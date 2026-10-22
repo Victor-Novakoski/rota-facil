@@ -1,5 +1,10 @@
 # O que mudou
 
+## Ainda não publicado
+
+- A planilha que chegou no WhatsApp abre direto no Rota Fácil: segure a mensagem, toque em Compartilhar e escolha Rota Fácil (Android, com o app instalado).
+- Ajuda com o passo a passo para abrir a planilha do WhatsApp no Android e no iPhone.
+
 ## 2.1.0 – 2026-10-22
 
 MVP fechado: pronto para o teste na rua.

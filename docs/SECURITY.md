@@ -24,5 +24,6 @@ O Rota Fácil não tem servidor, banco, login nem API. Os dados da planilha (end
 | Rate limit | ⚪ ainda não se aplica | Não há servidor. |
 | Envio duplicado | ⚪ ainda não se aplica | Nada é enviado. Baixar duas vezes só gera o mesmo arquivo. |
 | Upload | ⚪ ainda não se aplica | O arquivo escolhido não é enviado para lugar nenhum. |
+| Planilha compartilhada por outro app | ✅ feito | O "Compartilhar" do Android entrega a planilha ao service worker do próprio app, sem servidor. Ela fica num cache temporário do navegador e é apagada assim que o app lê, e passa pelos mesmos limites de tamanho e linhas. |
 | Vazamento de informação em erro | ✅ feito | Mensagens de erro são em português simples e não mostram detalhes internos. O detalhe vai só para o console do navegador. |
 | Uso indevido de marca | ✅ feito | O app diz "compatível com planilhas da iMile" e "para importar no Spoke", e deixa claro que é independente. |

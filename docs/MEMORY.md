@@ -30,3 +30,10 @@ Decisões com trade-off e o porquê, por data e etapa.
 - **CSP só no build.** O modo de desenvolvimento do Vite usa script inline e conexão com o próprio computador, que a CSP bloquearia. Um plugin pequeno no `vite.config.ts` coloca a `<meta>` só no arquivo publicado, e o teste no navegador roda nessa versão.
 - **CSP sem `'unsafe-inline'`.** O app não tem script nem estilo inline (o React aplica `style` pelo JavaScript, que a CSP permite). Mais rígido sem custo.
 - **Limite de 5 MB e 5.000 linhas.** A planilha real de um dia (57 pacotes) tem uns 9 KB, então os limites ficam muito acima do uso normal. O limite de linhas existe porque um .xlsx é compactado: um arquivo pequeno pode virar milhões de linhas ao abrir. O tamanho é conferido antes de ler o arquivo; as linhas, durante a leitura.
+
+## 22/10/2026 — Etapa 3 (Teste na rua)
+
+- **Planilha do WhatsApp pelo "Compartilhar".** No primeiro teste, o Victor não conseguiu achar a planilha: o WhatsApp novo guarda os documentos numa pasta só dele, que não aparece no seletor de arquivos. A solução foi o Web Share Target: com o app instalado, o Rota Fácil aparece na lista "Compartilhar" do Android. O pedido é atendido pelo service worker (`public/share-target.js`), dentro do próprio celular. A planilha fica num cache temporário e o app apaga a cópia assim que lê. Descartado: pedir para passar pelo Google Drive, porque dá mais trabalho e manda a planilha para fora do celular.
+- **"Abrir com" (File Handling) entrou junto, sem garantia.** Não custa nada declarar, mas não há confirmação de que o Chrome no Android mostra apps web nessa lista. O caminho garantido é o "Compartilhar".
+- **iPhone não tem isso.** O Safari não aceita apps web na lista de compartilhar. A Ajuda explica o caminho "Salvar em Arquivos".
+

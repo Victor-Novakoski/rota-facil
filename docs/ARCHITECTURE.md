@@ -55,6 +55,7 @@ Download: .xlsx (Android) ou PDF (iPhone, src/core/pdf.ts)
 | `src/ui/` | Telas e componentes React. Usa o motor; nunca lê planilha direto. |
 | `src/ui/screens/` | Uma tela por arquivo: Onboarding, Home, Review, Help, About. |
 | `src/ui/components/` | Peças reaproveitadas: ícones, faixa de conferência, cartão de parada. |
+| `src/ui/shared.ts` + `public/share-target.js` | Planilha que chega pelo "Compartilhar" do Android: o service worker guarda num cache temporário e o app lê e apaga. |
 | `e2e/` | Testes no navegador (Playwright). |
 | `public/` | Ícones do app. |
 | `scripts/` | Utilitários (gerar ícones). |
