@@ -146,8 +146,8 @@ select:disabled { opacity: 1; appearance: none; }
 .stop.warn.done { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-left: 6px solid var(--ok-line); }
 .stop.warn.done .stop-why { display: none; }
 .stop-head { display: flex; align-items: center; gap: 8px; }
-.stop-no { font-family: var(--display); font-weight: 700; font-size: 1.05rem; letter-spacing: .05em; text-transform: uppercase; }
 .pill { font-size: .8rem; font-weight: 700; border-radius: 999px; padding: 2px 9px; background: var(--info-bg); color: var(--info-ink); }
+.pill.edited { background: var(--ok-bg); color: var(--ok-ink); }
 .stop-addr { font-weight: 700; font-size: 1.08rem; }
 .stop-comp { font-size: .95rem; }
 .stop-why { margin: 6px 0 0; padding-left: 18px; font-size: .95rem; }
@@ -157,6 +157,12 @@ select:disabled { opacity: 1; appearance: none; }
 .stop.warn:not(.done) .stop-tracks b { color: var(--warn-ink); }
 .check-btn { appearance: none; margin-top: 8px; align-self: flex-start; min-height: 44px; padding: 8px 14px; border-radius: 10px; border: 2px solid currentColor; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
 .check-btn.on { border-color: var(--ok-line); color: var(--ok-ink); }
+.stop-actions { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.stop-edit { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.stop .field { color: inherit; font-size: .9rem; font-weight: 700; }
+.stop-edit input { font: inherit; font-size: 1.05rem; font-weight: 400; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 10px; min-height: 48px; width: 100%; }
+.stop-edit input:focus-visible { outline: 3px solid var(--warn-line); outline-offset: 2px; }
+.field-error { color: var(--bad-ink); font-weight: 700; }
 details.all { border-top: 1px solid var(--line); padding-top: 8px; }
 summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
 .toast { font-weight: 700; color: var(--ok-ink); font-size: .95rem; }
