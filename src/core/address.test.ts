@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanAddress } from '../src/core';
+import { cleanAddress } from '.';
 
 // Todos os endereços aqui são inventados ou casos genéricos da referência técnica.
 describe('cleanAddress', () => {

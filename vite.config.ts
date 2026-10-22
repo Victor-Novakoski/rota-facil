@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
@@ -8,11 +9,38 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 // No GitHub Pages o site fica em /rota-facil/. O workflow de publicação define BASE_PATH.
 const base = process.env.BASE_PATH ?? '/';
 
+// Regras de segurança da página (Content Security Policy). O GitHub Pages não deixa configurar
+// cabeçalhos, então elas vão numa <meta> do index.html. Só entram no build: o modo de
+// desenvolvimento do Vite usa script inline e conexão com o próprio computador.
+// connect-src 'self' garante que a página não consegue mandar nada para outro site.
+export const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+].join('; ');
+
+function contentSecurityPolicy(): Plugin {
+  return {
+    name: 'rota-facil-csp',
+    apply: 'build',
+    transformIndexHtml: () => [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: CSP }, injectTo: 'head-prepend' }],
+  };
+}
+
 export default defineConfig({
   base,
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
+    contentSecurityPolicy(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
@@ -36,5 +64,8 @@ export default defineConfig({
       workbox: { globPatterns: ['**/*.{js,css,html,svg,png,woff2}'] },
     }),
   ],
-  test: { include: ['tests/**/*.test.ts'] },
+  test: {
+    include: ['src/**/*.test.{ts,tsx}'],
+    setupFiles: ['src/test-setup.ts'],
+  },
 });

@@ -7,7 +7,10 @@ import '@fontsource/barlow-condensed/latin-700.css';
 import './ui/styles.css';
 import { App } from './ui/App';
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root');
+if (!root) throw new Error('Elemento #root não encontrado no index.html');
+
+createRoot(root).render(
   <StrictMode>
     <App />
   </StrictMode>,

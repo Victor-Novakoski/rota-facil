@@ -1,0 +1,54 @@
+# PRD – Rota Fácil
+
+## Problema
+
+Entregadores de última milha (iMile e outras transportadoras) usam apps de rota como o Spoke. A etiqueta do pacote só tem o rastreio no código de barras e no QR, sem endereço, então o app de rota não consegue ler. A base manda uma planilha com as entregas do dia, mas digitar 40 a 60 endereços na mão leva muito tempo, e os endereços vêm bagunçados (número repetido, complemento antes do número, vírgulas, rua sem número).
+
+## Solução
+
+Um app web, gratuito e instalável no celular, que:
+
+1. Abre a planilha do dia que a base mandou.
+2. Limpa os endereços com regras testadas (rua, número e complemento separados; nomes de rua conhecidos corrigidos).
+3. Junta os pacotes do mesmo endereço numa parada só, com todos os rastreios nas notas.
+4. Confere que nenhum pacote se perdeu.
+5. Gera o arquivo no formato que o app de rota importa.
+
+Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
+
+## Público
+
+| Papel | Quem é | O que precisa |
+| --- | --- | --- |
+| Entregador (motorista ou motoboy) | Usa no celular, na rua, com uma mão e no sol | Converter a planilha em 1 minuto e confiar que nenhum pacote ficou de fora |
+| Mantenedor | Victor | Adicionar transportadoras, apps de rota e correções de rua sem reescrever o app |
+
+## Funcionalidades
+
+| Funcionalidade | Situação |
+| --- | --- |
+| Ler planilha .xlsx da iMile | ✅ feito |
+| Limpar endereço (regras 3.1 a 3.7 da referência técnica) | ✅ feito |
+| Agrupar pacotes por endereço + CEP | ✅ feito |
+| Avisos em amarelo (sem número, sem localização, endereço corrigido) | ✅ feito |
+| Marcar aviso como conferido | ✅ feito |
+| Conferência obrigatória antes de liberar o arquivo | ✅ feito |
+| Arquivo para o Spoke no Android (.xlsx) | ✅ feito |
+| PDF para o "Import route manifest" do Spoke no iPhone | 🟡 parcial (gerado, ainda não testado no Spoke) |
+| Passo a passo de importação no app | ✅ feito |
+| Erro amigável com as colunas que faltam | ✅ feito |
+| Instalar na tela inicial e usar sem internet | 🟡 parcial (feito, ainda não testado em celular de verdade) |
+| Publicação no GitHub Pages | 🟡 parcial (workflow pronto, falta ligar o Pages) |
+| Botão "Avisar um problema" pelo WhatsApp | 💭 a decidir (falta o número) |
+| Outros apps de rota (Circuit, Google Maps ou outro) | 💭 a decidir (pesquisar quais aceitam 40+ paradas) |
+| Outras transportadoras (Loggi, J&T, Shopee, Mercado Envios) | 💭 a decidir (precisa de planilha de exemplo de cada uma) |
+| Modo carregamento (ler o código de barras e mostrar "parada 12 de 46") | 💭 a decidir |
+| Mapa de conferência dos pontos | 💭 a decidir |
+| Lista de correções de rua que cresce com o uso | 💭 a decidir |
+
+## Fora do escopo por enquanto
+
+- Servidor, cadastro, login ou qualquer dado guardado fora do celular.
+- Analytics. Se um dia entrar, será só contagem de acessos, sem conteúdo.
+- App nas lojas (Play Store e App Store). O app é instalado pelo navegador.
+- Otimizar a rota. Isso é trabalho do app de rota.

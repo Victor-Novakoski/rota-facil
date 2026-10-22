@@ -1,5 +1,16 @@
 # O que mudou
 
+## 2.1.0 – 2026-10-22
+
+MVP fechado: pronto para o teste na rua.
+
+- Proteção da página (CSP): o navegador só deixa o app falar com o próprio site, então nenhum dado consegue sair do celular nem por engano.
+- Planilha acima de 5 MB ou com mais de 5.000 linhas é recusada com uma mensagem clara, para não travar o celular.
+- SheetJS atualizado para a versão oficial 0.20.3, que corrige falhas de segurança na leitura de planilhas.
+- Padrões de trabalho do projeto: pasta `docs/`, template de PR, CI com nomes em português, Dependabot, Makefile e ESLint.
+- Testes das telas com Testing Library; testes agora ficam ao lado dos arquivos.
+- README com prints e roteiro de teste.
+
 ## 2.0.0 – 2026-10-22
 
 Primeira versão como projeto profissional (React + Vite).

@@ -30,7 +30,7 @@ export function groupStops(packages: Package[]): Stop[] {
     const warnings: Warning[] = [];
     if (!withCoord) {
       warnings.push({ kind: 'noCoords', text: 'Sem localização no mapa (veio 0 na planilha). O app de rota vai procurar pelo endereço escrito.' });
-    } else if (!inBrazil(withCoord.lat!, withCoord.lon!)) {
+    } else if (withCoord.lat !== null && withCoord.lon !== null && !inBrazil(withCoord.lat, withCoord.lon)) {
       warnings.push({ kind: 'oddCoords', text: 'Localização fora do Brasil. Confira o ponto no mapa.' });
     }
     if (items.some((it) => it.flags.noNumber)) warnings.push({ kind: 'noNumber', text: 'Sem número no endereço.' });
