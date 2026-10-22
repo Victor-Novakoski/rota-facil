@@ -47,7 +47,9 @@ export function verify(sheet: ArrayBuffer, packages: Package[], app: RouteAppPro
     if (cellText(r[col.state]) !== p.state) errors.push(`Estado diferente no pacote final ${end}.`);
 
     const outDigits = new Set(digitsOf(`${cellText(r[col.line1])} ${cellText(r[col.line2])}`));
-    const lost = digitsOf(p.rawAddress).filter((d) => !outDigits.has(d));
+    // endereço editado: confere com o que o entregador digitou, não com a planilha
+    const source = p.edited ? `${p.line1} ${p.line2}` : p.rawAddress;
+    const lost = digitsOf(source).filter((d) => !outDigits.has(d));
     if (lost.length) errors.push(`No pacote final ${end} sumiu o número ${lost.join(', ')} do endereço.`);
 
     if (p.lat !== null && p.lon !== null) {
