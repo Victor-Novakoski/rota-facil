@@ -68,7 +68,7 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
 
   let street: string[];
   let number: string | null = null;
-  let comp: string[] = [];
+  let comp: string[];
 
   if (i === -1) {
     // regra 3.7: sem número nenhum
