@@ -24,7 +24,7 @@ describe('planilha de exemplo (10 entregas inventadas)', () => {
     const s = r.stops[0];
     expect(s.line1).toBe('Rua das Flores, 120');
     expect(s.line2).toBe('apto 302 / Loja Exemplo / Apartamento 1001');
-    expect(s.notes).toBe('3 PACOTES: 3320000000011 (apto 302) ; 3320000000022 (Loja Exemplo) ; 3320000000033 (Apartamento 1001)');
+    expect(s.notes).toBe('0011, 0022, 0033 | 3 PACOTES: 3320000000011 (apto 302) ; 3320000000022 (Loja Exemplo) ; 3320000000033 (Apartamento 1001)');
   });
 
   it('mostra os avisos esperados', () => {
@@ -35,7 +35,7 @@ describe('planilha de exemplo (10 entregas inventadas)', () => {
   it('grava o arquivo com os cabeçalhos exatos do Spoke', () => {
     const rows = readSheets(r.sheet)[0];
     expect(rows[0]).toEqual(spoke.headers);
-    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', '', '', 1, '1 pacote: 3320000000088 (Cartório)']);
+    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', '', '', 1, '0088 | 1 pacote: 3320000000088 (Cartório)']);
   });
 });
 

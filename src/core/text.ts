@@ -9,6 +9,9 @@ export const plain = (s: unknown): string =>
 
 export const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/** Final do rastreio que a etiqueta mostra em destaque. */
+export const lastDigits = (waybill: string, n = 4): string => waybill.slice(-n);
+
 export const digitsOf = (s: unknown): string[] => String(s ?? '').match(/\d+/g) ?? [];
 
 /** Valor de célula como texto. Números inteiros grandes (rastreios) não viram notação científica. */

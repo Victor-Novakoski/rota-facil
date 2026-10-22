@@ -155,9 +155,20 @@ select:disabled { opacity: 1; appearance: none; }
 .stop.warn:not(.done) .stop-tracks { color: var(--warn-ink); }
 .stop-tracks b { font-size: 1rem; color: var(--ink); }
 .stop.warn:not(.done) .stop-tracks b { color: var(--warn-ink); }
+.stop-tracks .found { background: var(--info-bg); color: var(--info-ink); border-radius: 6px; padding: 0 6px; }
+.stop-tracks .found b { color: var(--info-ink); font-size: 1.15rem; }
+.search input { font: inherit; font-size: 1.15rem; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 10px; min-height: 52px; width: 100%; font-variant-numeric: tabular-nums; }
+.search input:focus-visible { outline: 3px solid var(--info-ink); outline-offset: 2px; }
+.search .field { font-weight: 700; font-size: 1rem; color: var(--ink); }
 .check-btn { appearance: none; margin-top: 8px; align-self: flex-start; min-height: 44px; padding: 8px 14px; border-radius: 10px; border: 2px solid currentColor; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; }
 .check-btn.on { border-color: var(--ok-line); color: var(--ok-ink); }
 .stop-actions { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.dup-pick { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.dup-pick legend { padding: 0; margin-bottom: 4px; font-weight: 700; }
+.dup-opt { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 2px solid currentColor; border-radius: 10px; cursor: pointer; min-height: 48px; }
+.dup-opt:has(input:checked) { background: var(--surface); color: var(--ink); border-color: var(--ok-line); }
+.dup-opt input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--ok-line); }
+.dup-opt > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .stop-edit { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .stop .field { color: inherit; font-size: .9rem; font-weight: 700; }
 .stop-edit input { font: inherit; font-size: 1.05rem; font-weight: 400; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 10px; min-height: 48px; width: 100%; }

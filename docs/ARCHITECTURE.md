@@ -18,9 +18,15 @@ src/core/read.ts          acha o cabeçalho do perfil da transportadora
 src/core/address.ts       limpa o endereço: rua + número | complemento
         ▼
 src/core/group.ts         junta pacotes com o mesmo endereço + CEP
-                          e calcula os avisos
+                          e calcula os avisos; as notas começam pelos
+                          4 últimos dígitos de cada rastreio
                           (src/core/edit.ts: se o entregador editar um endereço
                           na tela, os pacotes mudam e tudo daqui para baixo roda de novo)
+        ▼
+src/core/far.ts           aviso da parada com o ponto no mapa longe das outras
+src/core/duplicates.ts    acha paradas do mesmo CEP e número com a rua escrita
+                          diferente; juntar usa o mesmo caminho da edição
+src/core/search.ts        acha a parada pelo final do rastreio (busca da conferência)
         ▼
 src/core/index.ts         monta o arquivo com o perfil do app de rota
         ▼
