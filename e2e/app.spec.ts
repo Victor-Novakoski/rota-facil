@@ -71,3 +71,30 @@ test('arquivo grande demais é recusado', async ({ page }) => {
   await page.locator('#file').setInputFiles({ name: 'enorme.xlsx', mimeType: 'application/octet-stream', buffer: Buffer.alloc(6 * 1024 * 1024) });
   await expect(page.getByText(/grande demais \(6 MB\)/)).toBeVisible();
 });
+
+test('planilha compartilhada pelo celular (ex.: WhatsApp) abre direto no app', async ({ page }) => {
+  const manifest = await (await page.request.get('/manifest.webmanifest')).json();
+  expect(manifest.share_target).toMatchObject({ action: '/compartilhar', method: 'POST', enctype: 'multipart/form-data' });
+
+  // espera o service worker assumir a página, como no app instalado
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) await new Promise((r) => navigator.serviceWorker.addEventListener('controllerchange', r, { once: true }));
+  });
+
+  // o Android manda a planilha do mesmo jeito: um POST com o arquivo
+  const bytes = [...readFileSync(FIXTURE)];
+  const landed = await page.evaluate(async (data) => {
+    const form = new FormData();
+    form.append('planilha', new File([new Uint8Array(data)], 'Entregas.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    const res = await fetch('/compartilhar', { method: 'POST', body: form });
+    return res.url;
+  }, bytes);
+  expect(landed).toMatch(/\/\?compartilhado=1$/);
+
+  await page.goto(landed);
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+  expect(new URL(page.url()).search).toBe('');
+  // a cópia temporária foi apagada
+  expect(await page.evaluate(async () => (await (await caches.open('rota-facil-compartilhado')).keys()).length)).toBe(0);
+});

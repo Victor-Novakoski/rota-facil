@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { findCarrier } from '../core/carriers';
 import { checkFileSize } from '../core/limits';
 import { findRouteApp } from '../core/route-apps';
@@ -8,6 +8,7 @@ import { EXAMPLE_ROWS } from './example';
 import { detectPlatform, prefs, readFile, saveFile, today } from './lib';
 import { About } from './screens/About';
 import { Help } from './screens/Help';
+import { onLaunchFile, takeSharedFile } from './shared';
 import { Home } from './screens/Home';
 import { Onboarding } from './screens/Onboarding';
 import { Review } from './screens/Review';
@@ -80,6 +81,17 @@ export function App() {
       setBusy(false);
     }
   }
+
+  // Planilha que chegou pelo "Compartilhar" ou pelo "Abrir com" do celular
+  const openFromOutside = useEffectEvent((shared: { file: File } | { problem: string }) => {
+    finishOnboarding();
+    if ('file' in shared) void onFile(shared.file);
+    else setProblem({ message: shared.problem, details: [] });
+  });
+  useEffect(() => {
+    void takeSharedFile().then((shared) => shared && openFromOutside(shared));
+    onLaunchFile((file) => openFromOutside({ file }));
+  }, []);
 
   async function onExample() {
     setProblem(null);
