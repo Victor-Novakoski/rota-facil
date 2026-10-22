@@ -22,6 +22,7 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Testes ao lado dos arquivos, com Testing Library nas telas
 - [x] README no formato vitrine, com prints feitos com dados inventados
 - [x] SheetJS atualizado para 0.20.3 (pacote oficial), sem alertas no `npm audit`
+- [x] Testes no navegador da CI mais rápidos: imagem oficial do Playwright, que já tem o Chromium (antes levava uns 4 minutos só instalando)
 - [ ] Victor: configurar no GitHub o ruleset das branches, o GitHub Pages e a exclusão automática de branches (passo a passo no PR)
 
 ## Etapa 2 — Segurança (v2.1.0)
