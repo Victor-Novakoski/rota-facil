@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dev-dist/
+test-results/
+playwright-report/
+*.log
+.DS_Store
+
+# Planilhas reais têm endereços de clientes: NUNCA vão para o repositório.
+# Só planilhas inventadas em tests/fixtures podem ser versionadas.
+*.xlsx
+*.xls
+*.csv
+!tests/fixtures/*.xlsx
