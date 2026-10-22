@@ -29,7 +29,7 @@ export interface Package extends CleanAddress {
   edited?: boolean;
 }
 
-export type WarningKind = 'noCoords' | 'oddCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'oddZip';
+export type WarningKind = 'noCoords' | 'oddCoords' | 'farCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'oddZip';
 
 export interface Warning {
   kind: WarningKind;
@@ -101,11 +101,20 @@ export interface VerifyResult {
   stops: number;
 }
 
+/** Duas paradas do mesmo CEP e mesmo número com o nome da rua escrito diferente. */
+export interface DuplicatePair {
+  stops: [Stop, Stop];
+  /** Qual das duas tem o endereço mais completo (o app sugere juntar nela). */
+  suggested: 0 | 1;
+}
+
 export interface RouteResult {
   packages: Package[];
   /** Rastreios que vieram sem endereço e ficaram de fora. */
   noAddress: string[];
   stops: Stop[];
+  /** Paradas que podem ser o mesmo lugar; o entregador decide se junta. */
+  duplicates: DuplicatePair[];
   sheet: ArrayBuffer;
   check: VerifyResult;
 }
