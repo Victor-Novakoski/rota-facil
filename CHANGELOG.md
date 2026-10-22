@@ -1,5 +1,9 @@
 # O que mudou
 
+## 2.2.1 – 2026-10-22
+
+- O botão voltar do Android não fecha mais o app: da Ajuda e do Sobre ele volta para a tela de antes, sem perder a planilha aberta, e da conferência volta para o início para abrir outra planilha.
+
 ## 2.2.0 – 2026-10-22
 
 Melhorias que surgiram no começo do teste na rua. Ainda falta testar num Android e num iPhone de verdade.
