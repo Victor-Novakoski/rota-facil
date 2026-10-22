@@ -8,9 +8,11 @@ interface Props {
   checked?: boolean;
   onToggle?: () => void;
   onEdit?: (edit: AddressEdit) => void;
+  /** Rastreios achados na busca, destacados entre os da parada. */
+  found?: string[];
 }
 
-export function StopCard({ stop, showWarnings, checked, onToggle, onEdit }: Props) {
+export function StopCard({ stop, showWarnings, checked, onToggle, onEdit, found }: Props) {
   const warn = showWarnings && stop.warnings.length > 0;
   const [editing, setEditing] = useState(false);
   return (
@@ -45,7 +47,7 @@ export function StopCard({ stop, showWarnings, checked, onToggle, onEdit }: Prop
       )}
       <div className="stop-tracks">
         {stop.packages.map((p) => (
-          <span key={p.waybill}>
+          <span key={p.waybill} className={found?.includes(p.waybill) ? 'found' : undefined}>
             {p.waybill.slice(0, -4)}
             <b>{p.waybill.slice(-4)}</b>
           </span>

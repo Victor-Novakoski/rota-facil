@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { findByFinal, MIN_SEARCH_DIGITS } from '../../core';
 import type { AddressEdit, RouteAppProfile, RouteResult, Stop } from '../../core/types';
 import { Banner } from '../components/ui';
 import { StopCard } from '../components/StopCard';
@@ -18,6 +19,9 @@ const keyOf = (s: Stop) => s.packages[0]?.waybill ?? String(s.no);
 export function Review({ result, app, isExample, fileName, onEdit }: Props) {
   const { packages, stops, check, noAddress } = result;
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState('');
+  const typed = query.replace(/\D/g, '');
+  const found = findByFinal(stops, query);
   // parada editada continua na lista de avisos, para o entregador ver o que mudou
   const warned = stops.filter((s) => s.warnings.length || s.edited);
   const multi = stops.filter((s) => s.packages.length > 1);
@@ -29,7 +33,7 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
       else next.add(key);
       return next;
     });
-  const card = (s: Stop, extra: { showWarnings?: boolean } = {}) => (
+  const card = (s: Stop, extra: { showWarnings?: boolean; found?: string[] } = {}) => (
     <StopCard
       key={keyOf(s)}
       stop={s}
@@ -77,6 +81,29 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
           São {stops.length} paradas. O plano grátis do {app.name} aceita até {app.freeStopLimit} por rota, então precisa do plano pago.
         </p>
       )}
+
+      <section className="group search" aria-label="Achar pacote pelo final do rastreio">
+        <label className="field">
+          Achar pacote pelo final do rastreio
+          <input
+            type="search"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="Ex.: os 4 números grandes da etiqueta"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </label>
+        {typed.length >= MIN_SEARCH_DIGITS && found.length === 0 && (
+          <p className="muted" role="status">Nenhum pacote termina em {typed}. Confira o número na etiqueta.</p>
+        )}
+        {found.length > 1 && (
+          <p className="note-info" role="status">
+            {found.length} paradas têm pacote terminando em {typed}. Confira o rastreio inteiro na etiqueta.
+          </p>
+        )}
+        {found.length > 0 && <ul className="stops">{found.map((m) => card(m.stop, { found: m.waybills }))}</ul>}
+      </section>
 
       {warned.length > 0 && (
         <section className="group">

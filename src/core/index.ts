@@ -9,6 +9,7 @@ export * from './types';
 export { checkFileSize, MAX_FILE_BYTES, MAX_ROWS } from './limits';
 export { cleanAddress, STREET_FIXES } from './address';
 export { editPackages } from './edit';
+export { findByFinal, MIN_SEARCH_DIGITS, type FinalMatch } from './search';
 export { CARRIERS, findCarrier } from './carriers';
 export { ROUTE_APPS, findRouteApp } from './route-apps';
 

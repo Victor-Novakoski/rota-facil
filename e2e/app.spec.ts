@@ -55,6 +55,22 @@ test('editar o endereço refaz a conferência e o arquivo baixado já sai com o 
   expect(rows.map((r) => r[0])).toContain('Rua dos Testes, 50');
 });
 
+test('as notas começam pelo final do rastreio e a busca acha a parada', async ({ page }) => {
+  await page.locator('#file').setInputFiles(FIXTURE);
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+
+  const search = page.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
+  await search.getByRole('searchbox').fill('0022');
+  await expect(search.locator('.stop')).toHaveCount(1);
+  await expect(search.locator('.stop')).toContainText('Rua das Flores, 120');
+  await expect(search.locator('.found')).toHaveText('3320000000022');
+
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
+  const wb = XLSX.read(readFileSync(await download.path()));
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+  expect(String(rows[1][9])).toMatch(/^0011, 0022, 0033 \| 3 PACOTES: /);
+});
+
 test('planilha errada mostra as colunas que faltam', async ({ page }) => {
   const ws = XLSX.utils.aoa_to_sheet([['Waybill No', 'Endereco'], ['1', 'x']]);
   const wb = XLSX.utils.book_new();

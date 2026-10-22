@@ -98,4 +98,30 @@ describe('Review', () => {
     expect(within(card).queryByLabelText('Complemento')).not.toBeInTheDocument();
     expect(within(card).getByText('Complementos: apto 302 / Loja Exemplo / Apartamento 1001')).toBeInTheDocument();
   });
+
+  it('acha a parada pelo final do rastreio e destaca o pacote', async () => {
+    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    const search = screen.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
+    await userEvent.type(within(search).getByRole('searchbox'), '0022');
+    const card = within(search).getByText('Rua das Flores, 120').closest('li') as HTMLElement;
+    expect(within(card).getByText('apto 302 / Loja Exemplo / Apartamento 1001')).toBeInTheDocument();
+    expect(within(card).getByText('0022').parentElement).toHaveClass('found');
+    expect(within(card).getByText('0011').parentElement).not.toHaveClass('found');
+  });
+
+  it('avisa quando nenhum pacote tem aquele final', async () => {
+    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    const search = screen.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
+    await userEvent.type(within(search).getByRole('searchbox'), '9999');
+    expect(within(search).getByRole('status')).toHaveTextContent('Nenhum pacote termina em 9999.');
+  });
+
+  it('mostra as duas paradas quando dois pacotes têm o mesmo final', async () => {
+    const twin = { ...result.stops[7], packages: [{ ...result.stops[7].packages[0], waybill: '7770000000022' }] };
+    render(<Review result={{ ...result, stops: [...result.stops, twin] }} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    const search = screen.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
+    await userEvent.type(within(search).getByRole('searchbox'), '0022');
+    expect(within(search).getByRole('status')).toHaveTextContent('2 paradas têm pacote terminando em 0022. Confira o rastreio inteiro na etiqueta.');
+    expect(within(search).getAllByRole('listitem')).toHaveLength(2);
+  });
 });
