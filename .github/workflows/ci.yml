@@ -1,23 +1,105 @@
-name: Testes
+name: CI
 
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  lint:
+    name: Lint, tipos e build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run typecheck
+      - run: npm run build
+
+  testes:
+    name: Testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npm test
+
+  e2e:
+    name: Testes no navegador
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
           CI: true
+
+  dependencias:
+    name: Dependências
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - run: npm audit --omit=dev --audit-level=high
+
+  segredos:
+    name: Segredos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  conventional-commits:
+    name: Conventional Commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir o título do PR
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|test|refactor|perf|style|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: [a-zà-ú0-9]'
+          if printf '%s' "$TITLE" | grep -Pq "$pattern"; then
+            echo "Título ok: $TITLE"
+          else
+            echo "::error::O título do PR precisa seguir o padrão 'tipo: assunto' com o assunto começando em minúsculo. Ex.: 'feat: busca de receitas'. Recebido: $TITLE"
+            exit 1
+          fi
+
+  main-so-da-develop:
+    name: PR para a main só da develop
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir a branch de origem
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          if [ "$BASE" = "main" ] && [ "$HEAD" != "develop" ]; then
+            echo "::error::PR para a main só pode vir da develop. Este vem de '$HEAD'. Abra o PR para a develop."
+            exit 1
+          fi
+          echo "Ok: $HEAD -> $BASE"

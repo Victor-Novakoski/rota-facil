@@ -18,7 +18,7 @@ interface Problem { message: string; details: string[] }
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 export function App() {
-  const platform = useMemo(detectPlatform, []);
+  const platform = useMemo(() => detectPlatform(), []);
   const [onboarded, setOnboarded] = useState(() => prefs.get('onboarded') === '1');
   const [carrierId, setCarrierId] = useState(() => prefs.get('carrier') ?? '');
   const [appId, setAppId] = useState(() => prefs.get('routeApp') ?? '');

@@ -1,5 +1,5 @@
 // Planilha de exemplo com endereços INVENTADOS, para mostrar como o app funciona.
-// Os mesmos casos difíceis de tests/fixtures/exemplo-imile-ficticio.xlsx.
+// Os mesmos casos difíceis de src/core/fixtures/exemplo-imile-ficticio.xlsx.
 export const EXAMPLE_ROWS: string[][] = [
   ['Waybill No', 'Consignee Zip Code', 'Consignee Province', 'Consignee City', 'Consignee Area', 'Consignee Address', 'Delivery Associate', 'Consignee Longitude', 'Consignee Latitude'],
   ['3320000000011', '80000-001', 'Paraná', 'Curitiba', 'Centro', 'Rua das Flores 120 apto 302', 'EXEMPLO', '-49.27000', '-25.43000'],
