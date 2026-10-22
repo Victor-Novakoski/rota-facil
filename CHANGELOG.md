@@ -1,6 +1,8 @@
 # O que mudou
 
-## Ainda não publicado
+## 2.1.0 – 2026-10-22
+
+MVP fechado: pronto para o teste na rua.
 
 - Proteção da página (CSP): o navegador só deixa o app falar com o próprio site, então nenhum dado consegue sair do celular nem por engano.
 - Planilha acima de 5 MB ou com mais de 5.000 linhas é recusada com uma mensagem clara, para não travar o celular.
