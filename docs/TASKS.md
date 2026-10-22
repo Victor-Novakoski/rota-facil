@@ -37,6 +37,8 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [ ] Testar num Android de verdade: abrir, instalar na tela inicial, converter e importar no Spoke
 - [ ] Testar num iPhone: PDF no "Import route manifest" do Spoke
 - [ ] Uma semana de uso com o irmão do Victor e mais 3 a 5 entregadores
+- [x] Abrir a planilha direto do WhatsApp: o Rota Fácil aparece no "Compartilhar" do Android (o WhatsApp novo não mostra os documentos no seletor de arquivos)
+- [ ] Conferir num Android de verdade: compartilhar a planilha do WhatsApp com o Rota Fácil instalado
 - [ ] Corrigir o que aparecer, cada correção com teste
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
 

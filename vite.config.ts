@@ -27,6 +27,8 @@ export const CSP = [
   "form-action 'none'",
 ].join('; ');
 
+const SHEET_TYPES = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+
 function contentSecurityPolicy(): Plugin {
   return {
     name: 'rota-facil-csp',
@@ -60,8 +62,20 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
+        // Rota Fácil na lista "Compartilhar" do Android (com o app instalado).
+        // O pedido é atendido por public/share-target.js, dentro do celular.
+        share_target: {
+          action: `${base}compartilhar`,
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: { files: [{ name: 'planilha', accept: [...SHEET_TYPES, '.xlsx', '.xls'] }] },
+        },
+        // "Abrir com" nos sistemas que aceitam apps web para abrir arquivos.
+        file_handlers: [
+          { action: base, accept: { [SHEET_TYPES[0]]: ['.xlsx'], [SHEET_TYPES[1]]: ['.xls'] } },
+        ],
       },
-      workbox: { globPatterns: ['**/*.{js,css,html,svg,png,woff2}'] },
+      workbox: { globPatterns: ['**/*.{js,css,html,svg,png,woff2}'], importScripts: ['share-target.js'] },
     }),
   ],
   test: {

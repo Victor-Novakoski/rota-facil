@@ -36,6 +36,7 @@ Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
 | Arquivo para o Spoke no Android (.xlsx) | ✅ feito |
 | PDF para o "Import route manifest" do Spoke no iPhone | 🟡 parcial (gerado, ainda não testado no Spoke) |
 | Passo a passo de importação no app | ✅ feito |
+| Abrir a planilha direto do WhatsApp pelo "Compartilhar" do Android | 🟡 parcial (feito e testado no navegador, falta testar num Android de verdade) |
 | Erro amigável com as colunas que faltam | ✅ feito |
 | Instalar na tela inicial e usar sem internet | 🟡 parcial (feito, ainda não testado em celular de verdade) |
 | Publicação no GitHub Pages | 🟡 parcial (workflow pronto, falta ligar o Pages) |
