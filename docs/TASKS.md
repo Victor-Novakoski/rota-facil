@@ -48,6 +48,7 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Busca na conferência pelo final do rastreio: mostra rua e complemento da parada; se dois pacotes têm o mesmo final, mostra os dois e avisa
 - [x] Aviso amarelo quando o ponto no mapa de uma parada está longe das outras (mais de 15 km e 4 vezes mais longe que o normal da rota)
 - [x] Sugerir juntar paradas do mesmo CEP e número com a rua escrita de outro jeito; o entregador escolhe o endereço que fica ou diz que são lugares diferentes
+- [x] Botão voltar do Android troca de tela (Ajuda, Sobre, conferência → início) em vez de fechar o app, sem perder a planilha aberta
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
 
 ## Etapa 4 — Outros apps de rota (v2.3)

@@ -8,12 +8,12 @@ import { EXAMPLE_ROWS } from './example';
 import { detectPlatform, prefs, readFile, saveFile, today } from './lib';
 import { About } from './screens/About';
 import { Help } from './screens/Help';
+import { useScreenHistory } from './navigation';
 import { onLaunchFile, takeSharedFile } from './shared';
 import { Home } from './screens/Home';
 import { Onboarding } from './screens/Onboarding';
 import { Review } from './screens/Review';
 
-type Screen = 'home' | 'review' | 'help' | 'about';
 interface Loaded { result: RouteResult; isExample: boolean; fileName: string }
 interface Problem { message: string; details: string[] }
 
@@ -27,17 +27,16 @@ export function App() {
   const carrier = findCarrier(carrierId);
   const app = findRouteApp(appId);
 
-  const [screen, setScreen] = useState<Screen>('home');
+  const nav = useScreenHistory();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; bad?: boolean } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const go = (s: Screen) => {
-    setScreen(s);
-    window.scrollTo({ top: 0 });
-  };
+  const { go } = nav;
+  // Conferência sem planilha carregada (trocou a transportadora, ou abriu de novo o app) mostra o início
+  const screen = nav.screen === 'review' && !loaded ? 'home' : nav.screen;
   const fail = (e: unknown, fallback: string) => {
     if (e instanceof FriendlyError) setProblem({ message: e.message, details: e.details });
     else {
@@ -164,7 +163,7 @@ export function App() {
         {screen === 'home' ? (
           <div className="brand"><Logo size={36} /><span>Rota Fácil</span></div>
         ) : (
-          <button type="button" className="iconbtn" onClick={() => go(screen === 'review' || !loaded ? 'home' : 'review')}>
+          <button type="button" className="iconbtn" onClick={() => (screen === 'review' ? go('home') : nav.back())}>
             <Icon name="back" /> <span>{screen === 'review' ? 'Nova planilha' : 'Voltar'}</span>
           </button>
         )}

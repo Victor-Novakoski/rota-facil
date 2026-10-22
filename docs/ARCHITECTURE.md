@@ -63,6 +63,7 @@ Download: .xlsx (Android) ou PDF (iPhone, src/core/pdf.ts)
 | `src/ui/` | Telas e componentes React. Usa o motor; nunca lê planilha direto. |
 | `src/ui/screens/` | Uma tela por arquivo: Onboarding, Home, Review, Help, About. |
 | `src/ui/components/` | Peças reaproveitadas: ícones, faixa de conferência, cartão de parada. |
+| `src/ui/navigation.ts` | Liga as telas ao histórico do navegador (botão voltar do celular). |
 | `src/ui/shared.ts` + `public/share-target.js` | Planilha que chega pelo "Compartilhar" do Android: o service worker guarda num cache temporário e o app lê e apaga. |
 | `e2e/` | Testes no navegador (Playwright). |
 | `public/` | Ícones do app. |
@@ -73,7 +74,7 @@ O motor (`src/core/index.ts`) é carregado só quando o entregador abre uma plan
 
 ## Telas
 
-Não há rotas de URL; o app troca de tela por estado.
+Não há rotas de URL; o app troca de tela por estado. Cada troca de tela também vira uma entrada no histórico do navegador (`src/ui/navigation.ts`, sem mudar o endereço), para o voltar do celular trocar de tela em vez de fechar o app. Ajuda e Sobre trocam entre si sem empilhar, e o início fica sempre na primeira entrada: voltar do início fecha o app.
 
 | Tela | Arquivo | Quando aparece |
 | --- | --- | --- |
