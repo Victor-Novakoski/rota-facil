@@ -1,0 +1,80 @@
+# Arquitetura – Rota Fácil
+
+Tudo roda no navegador do celular. Não existe servidor nem banco de dados. O GitHub Pages só entrega os arquivos do app; a planilha nunca sai do aparelho.
+
+## Fluxo
+
+```
+Planilha .xlsx da base
+        │  (escolhida pelo entregador, lida no próprio celular)
+        ▼
+src/core/spreadsheet.ts   lê as abas (SheetJS)
+        ▼
+src/core/read.ts          acha o cabeçalho do perfil da transportadora
+                          e transforma cada linha em pacote
+        ▼
+src/core/address.ts       limpa o endereço: rua + número | complemento
+        ▼
+src/core/group.ts         junta pacotes com o mesmo endereço + CEP
+                          e calcula os avisos
+        ▼
+src/core/index.ts         monta o arquivo com o perfil do app de rota
+        ▼
+src/core/verify.ts        relê o arquivo gerado e compara com a entrada
+        │                 ── se não bater, o download fica bloqueado
+        ▼
+Download: .xlsx (Android) ou PDF (iPhone, src/core/pdf.ts)
+```
+
+## Stack
+
+| Parte | Escolha |
+| --- | --- |
+| Linguagem | TypeScript (estrito) |
+| Tela | React 19 |
+| Build | Vite |
+| App instalável e sem internet | vite-plugin-pwa (Workbox) |
+| Ler e gravar planilha | SheetJS 0.20.3 (pacote oficial) |
+| PDF | jsPDF |
+| Fontes | Atkinson Hyperlegible e Barlow Condensed, dentro do app (Fontsource) |
+| Testes | Vitest + Testing Library; Playwright no navegador |
+| Lint | ESLint com typescript-eslint (`--max-warnings=0`) |
+| Hospedagem | GitHub Pages |
+| CI | GitHub Actions |
+
+## Pastas
+
+| Pasta | Papel |
+| --- | --- |
+| `src/core/` | O motor. Regras de endereço, agrupamento, conferência e geração dos arquivos. Não sabe nada de tela. |
+| `src/core/carriers/` | Um perfil por transportadora: nome e colunas da planilha. |
+| `src/core/route-apps/` | Um perfil por app de rota: cabeçalhos, montagem de cada linha, nome do arquivo e passo a passo. |
+| `src/core/fixtures/` | Planilhas de teste com dados inventados. |
+| `src/ui/` | Telas e componentes React. Usa o motor; nunca lê planilha direto. |
+| `src/ui/screens/` | Uma tela por arquivo: Onboarding, Home, Review, Help, About. |
+| `src/ui/components/` | Peças reaproveitadas: ícones, faixa de conferência, cartão de parada. |
+| `e2e/` | Testes no navegador (Playwright). |
+| `public/` | Ícones do app. |
+| `scripts/` | Utilitários (gerar ícones). |
+| `docs/` | Documentação do projeto. |
+
+O motor (`src/core/index.ts`) é carregado só quando o entregador abre uma planilha, e o jsPDF só quando ele pede o PDF. Assim a primeira tela abre rápido.
+
+## Telas
+
+Não há rotas de URL; o app troca de tela por estado.
+
+| Tela | Arquivo | Quando aparece |
+| --- | --- | --- |
+| Boas-vindas | `screens/Onboarding.tsx` | Só na primeira abertura (lembrado no `localStorage`) |
+| Início | `screens/Home.tsx` | Ao abrir; botão "Abrir planilha do dia" |
+| Conferência | `screens/Review.tsx` | Depois de ler a planilha; botões de download embaixo |
+| Ajuda | `screens/Help.tsx` | Botão "Ajuda" no topo |
+| Sobre | `screens/About.tsx` | Botão "Sobre" no topo |
+
+## Perfis
+
+Adicionar uma transportadora ou um app de rota é criar um perfil novo. O motor não muda.
+
+- `CarrierProfile` (`src/core/types.ts`): `id`, `name`, `compat` e `columns` (campo interno → cabeçalho exato na planilha).
+- `RouteAppProfile`: `headers`, `toRow(stop)`, `cols` (usado na conferência), `sheetFileName`, `pdfFileName` opcional, `freeStopLimit` opcional e `howTo`.

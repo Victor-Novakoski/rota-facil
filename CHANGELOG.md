@@ -1,5 +1,12 @@
 # O que mudou
 
+## Ainda não publicado
+
+- SheetJS atualizado para a versão oficial 0.20.3, que corrige falhas de segurança na leitura de planilhas.
+- Padrões de trabalho do projeto: pasta `docs/`, template de PR, CI com nomes em português, Dependabot, Makefile e ESLint.
+- Testes das telas com Testing Library; testes agora ficam ao lado dos arquivos.
+- README com prints e roteiro de teste.
+
 ## 2.0.0 – 2026-10-22
 
 Primeira versão como projeto profissional (React + Vite).
