@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import * as XLSX from 'xlsx';
 
-const FIXTURE = 'tests/fixtures/exemplo-imile-ficticio.xlsx';
+const FIXTURE = 'src/core/fixtures/exemplo-imile-ficticio.xlsx';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');

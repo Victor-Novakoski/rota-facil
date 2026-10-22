@@ -7,8 +7,8 @@ playwright-report/
 .DS_Store
 
 # Planilhas reais têm endereços de clientes: NUNCA vão para o repositório.
-# Só planilhas inventadas em tests/fixtures podem ser versionadas.
+# Só planilhas inventadas em src/core/fixtures podem ser versionadas.
 *.xlsx
 *.xls
 *.csv
-!tests/fixtures/*.xlsx
+!src/core/fixtures/*.xlsx

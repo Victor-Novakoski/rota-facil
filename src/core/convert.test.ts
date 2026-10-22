@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { convertFile, convertRows, findCarrier, findRouteApp, FriendlyError } from '../src/core';
-import { readSheets } from '../src/core/spreadsheet';
+import { convertFile, convertRows, findCarrier, findRouteApp, FriendlyError } from '.';
+import { readSheets } from './spreadsheet';
 
 const imile = findCarrier('imile');
 const spoke = findRouteApp('spoke');
@@ -11,7 +11,7 @@ const load = (p: string) => {
 };
 
 describe('planilha de exemplo (10 entregas inventadas)', () => {
-  const r = convertFile(load('tests/fixtures/exemplo-imile-ficticio.xlsx'), imile, spoke);
+  const r = convertFile(load('src/core/fixtures/exemplo-imile-ficticio.xlsx'), imile, spoke);
 
   it('gera 8 paradas com 10 pacotes e passa na conferência', () => {
     expect(r.packages).toHaveLength(10);
@@ -64,10 +64,10 @@ describe('erros amigáveis', () => {
 
 // Planilha real: NUNCA vai para o repositório. Para testar no seu computador:
 //   REAL_SHEET="/caminho/planilha.xlsx" REAL_EXPECT="57/46" npm test
-const real = process.env.REAL_SHEET;
-describe.skipIf(!real || !existsSync(real))('planilha real (fora do repositório)', () => {
+const real = process.env.REAL_SHEET ?? '';
+describe.skipIf(!existsSync(real))('planilha real (fora do repositório)', () => {
   it('confere pacotes e paradas', () => {
-    const r = convertFile(load(real!), imile, spoke);
+    const r = convertFile(load(real), imile, spoke);
     expect(r.check.errors).toEqual([]);
     if (process.env.REAL_EXPECT) expect(`${r.packages.length}/${r.stops.length}`).toBe(process.env.REAL_EXPECT);
   });
