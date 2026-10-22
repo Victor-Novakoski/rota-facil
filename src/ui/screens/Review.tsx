@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { RouteAppProfile, RouteResult } from '../../core/types';
+import type { AddressEdit, RouteAppProfile, RouteResult, Stop } from '../../core/types';
 import { Banner } from '../components/ui';
 import { StopCard } from '../components/StopCard';
 
@@ -8,21 +8,37 @@ interface Props {
   app: RouteAppProfile;
   isExample: boolean;
   fileName: string;
+  /** Troca o endereço dos pacotes de uma parada; o App refaz paradas, arquivo e conferência. */
+  onEdit: (waybills: string[], edit: AddressEdit) => void;
 }
 
-export function Review({ result, app, isExample, fileName }: Props) {
+/** Chave que não muda quando as paradas são refeitas depois de uma edição. */
+const keyOf = (s: Stop) => s.packages[0]?.waybill ?? String(s.no);
+
+export function Review({ result, app, isExample, fileName, onEdit }: Props) {
   const { packages, stops, check, noAddress } = result;
-  const [checked, setChecked] = useState<Set<number>>(new Set());
-  const warned = stops.filter((s) => s.warnings.length);
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  // parada editada continua na lista de avisos, para o entregador ver o que mudou
+  const warned = stops.filter((s) => s.warnings.length || s.edited);
   const multi = stops.filter((s) => s.packages.length > 1);
-  const pending = warned.filter((s) => !checked.has(s.no)).length;
-  const toggle = (no: number) =>
+  const pending = stops.filter((s) => s.warnings.length && !checked.has(keyOf(s))).length;
+  const toggle = (key: string) =>
     setChecked((prev) => {
       const next = new Set(prev);
-      if (next.has(no)) next.delete(no);
-      else next.add(no);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
+  const card = (s: Stop, extra: { showWarnings?: boolean } = {}) => (
+    <StopCard
+      key={keyOf(s)}
+      stop={s}
+      {...extra}
+      checked={extra.showWarnings && checked.has(keyOf(s))}
+      onToggle={extra.showWarnings ? () => toggle(keyOf(s)) : undefined}
+      onEdit={(edit) => onEdit(s.packages.map((p) => p.waybill), edit)}
+    />
+  );
 
   return (
     <main className="screen review">
@@ -34,7 +50,7 @@ export function Review({ result, app, isExample, fileName }: Props) {
 
       {check.ok && !noAddress.length && (
         <Banner tone="ok" title={`Conferido: ${packages.length} pacotes, nenhum perdido`}>
-          <p>Todos os rastreios, CEPs, números e localizações batem com a planilha.</p>
+          <p>Todos os rastreios, CEPs, números e localizações batem com a planilha{stops.some((s) => s.edited) ? ' e com o que você editou' : ''}.</p>
         </Banner>
       )}
       {check.ok && noAddress.length > 0 && (
@@ -65,29 +81,21 @@ export function Review({ result, app, isExample, fileName }: Props) {
       {warned.length > 0 && (
         <section className="group">
           <h2>Avisos para conferir</h2>
-          <p className="muted">Não impedem a rota. Olhe estas paradas com mais atenção.</p>
-          <ul className="stops">
-            {warned.map((s) => (
-              <StopCard key={s.no} stop={s} showWarnings checked={checked.has(s.no)} onToggle={() => toggle(s.no)} />
-            ))}
-          </ul>
+          <p className="muted">Não impedem a rota. Olhe estas paradas com mais atenção. Se o pacote mostra um número que a planilha não tem, toque em Editar endereço.</p>
+          <ul className="stops">{warned.map((s) => card(s, { showWarnings: true }))}</ul>
         </section>
       )}
 
       {multi.length > 0 && (
         <section className="group">
           <h2>Endereços com vários pacotes</h2>
-          <ul className="stops">
-            {multi.map((s) => <StopCard key={s.no} stop={s} />)}
-          </ul>
+          <ul className="stops">{multi.map((s) => card(s))}</ul>
         </section>
       )}
 
       <details className="group all">
         <summary>Ver todas as {stops.length} paradas</summary>
-        <ul className="stops">
-          {stops.map((s) => <StopCard key={s.no} stop={s} />)}
-        </ul>
+        <ul className="stops">{stops.map((s) => card(s))}</ul>
       </details>
     </main>
   );

@@ -54,6 +54,7 @@ export function groupStops(packages: Package[]): Stop[] {
       packages: items,
       notes,
       warnings,
+      edited: items.some((it) => it.edited === true),
     };
   });
 }
