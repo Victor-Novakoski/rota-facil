@@ -3,7 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
-import { buildRoute, convertRows, editPackages, findCarrier, findRouteApp } from '../../core';
+import { buildRoute, convertRows, editPackages, findCarrier, findRouteApp, type RouteResult } from '../../core';
 import { EXAMPLE_ROWS } from '../example';
 import { Review } from './Review';
 
@@ -12,8 +12,8 @@ const result = convertRows(EXAMPLE_ROWS, findCarrier('imile'), app);
 const noop = () => {};
 
 /** Faz o papel do App: guarda o resultado e refaz tudo a cada edição. */
-function Editable() {
-  const [r, setR] = useState(result);
+function Editable({ start = result }: { start?: RouteResult }) {
+  const [r, setR] = useState(start);
   return (
     <Review
       result={r}
@@ -97,5 +97,48 @@ describe('Review', () => {
     await userEvent.click(within(card).getByRole('button', { name: 'Editar endereço' }));
     expect(within(card).queryByLabelText('Complemento')).not.toBeInTheDocument();
     expect(within(card).getByText('Complementos: apto 302 / Loja Exemplo / Apartamento 1001')).toBeInTheDocument();
+  });
+
+  describe('pode ser o mesmo endereço', () => {
+    // exemplo + duas entregas inventadas no mesmo CEP, com o nome da rua escrito de dois jeitos
+    const extra = (w: string, address: string) => ['33200000003' + w, '80000-020', 'Paraná', 'Curitiba', 'Centro', address, 'EXEMPLO', '-49.27700', '-25.43700'];
+    const twice = convertRows([...EXAMPLE_ROWS, extra('01', 'Rua XV 72 casa 2'), extra('02', 'R. XV de Novembro 72 apto 3')], findCarrier('imile'), app);
+
+    it('mostra as duas formas, sugere a mais completa e conta como aviso', () => {
+      render(<Editable start={twice} />);
+      expect(screen.getByRole('heading', { name: 'Pode ser o mesmo endereço' })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /Rua XV de Novembro, 72/ })).toBeChecked();
+      expect(screen.getByRole('radio', { name: /Rua XV, 72/ })).not.toBeChecked();
+      expect(screen.getByText('paradas').previousSibling).toHaveTextContent('10');
+      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('6');
+    });
+
+    it('juntar vira uma parada só, marcada "editado por você", e a conferência continua ok', async () => {
+      render(<Editable start={twice} />);
+      await userEvent.click(screen.getByRole('button', { name: 'Juntar numa parada' }));
+      expect(screen.queryByRole('heading', { name: 'Pode ser o mesmo endereço' })).not.toBeInTheDocument();
+      expect(screen.getByText('paradas').previousSibling).toHaveTextContent('9');
+      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('5');
+      const merged = warnCard('Rua XV de Novembro, 72');
+      expect(within(merged).getByText('2 pacotes')).toBeInTheDocument();
+      expect(within(merged).getByText('editado por você')).toBeInTheDocument();
+      expect(screen.getByText('Conferido: 12 pacotes, nenhum perdido')).toBeInTheDocument();
+    });
+
+    it('dá para escolher o outro endereço', async () => {
+      render(<Editable start={twice} />);
+      await userEvent.click(screen.getByRole('radio', { name: /Rua XV, 72/ }));
+      await userEvent.click(screen.getByRole('button', { name: 'Juntar numa parada' }));
+      expect(within(warnCard('Rua XV, 72')).getByText('2 pacotes')).toBeInTheDocument();
+      expect(screen.getByText('paradas').previousSibling).toHaveTextContent('9');
+    });
+
+    it('"São lugares diferentes" some com a sugestão e não junta nada', async () => {
+      render(<Editable start={twice} />);
+      await userEvent.click(screen.getByRole('button', { name: 'São lugares diferentes' }));
+      expect(screen.queryByRole('heading', { name: 'Pode ser o mesmo endereço' })).not.toBeInTheDocument();
+      expect(screen.getByText('paradas').previousSibling).toHaveTextContent('10');
+      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('5');
+    });
   });
 });

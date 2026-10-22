@@ -1,4 +1,6 @@
+import { findDuplicates } from './duplicates';
 import { groupStops } from './group';
+import { markFarStops } from './far';
 import { checkFileSize, checkRowCount } from './limits';
 import { pickSheet, readPackages } from './read';
 import { readSheets, writeSheet } from './spreadsheet';
@@ -9,6 +11,7 @@ export * from './types';
 export { checkFileSize, MAX_FILE_BYTES, MAX_ROWS } from './limits';
 export { cleanAddress, STREET_FIXES } from './address';
 export { editPackages } from './edit';
+export { FAR_FACTOR, FAR_MIN_KM } from './far';
 export { CARRIERS, findCarrier } from './carriers';
 export { ROUTE_APPS, findRouteApp } from './route-apps';
 
@@ -26,10 +29,10 @@ export function convertRows(rows: unknown[][], carrier: CarrierProfile, app: Rou
 
 /** Pacotes já limpos (ou editados) -> paradas, arquivo pronto e conferência. */
 export function buildRoute(packages: Package[], noAddress: string[], app: RouteAppProfile): RouteResult {
-  const stops = groupStops(packages);
+  const stops = markFarStops(groupStops(packages));
   const sheet = buildRouteSheet(stops, app);
   const check = verify(sheet, packages, app);
-  return { packages, noAddress, stops, sheet, check };
+  return { packages, noAddress, stops, duplicates: findDuplicates(stops), sheet, check };
 }
 
 /** Arquivo da transportadora -> paradas, arquivo pronto e conferência. */

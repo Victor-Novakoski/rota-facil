@@ -18,6 +18,7 @@ App web gratuito que transforma a planilha de entregas do dia num arquivo pronto
 - Ver os endereços já arrumados: rua e número de um lado, complemento do outro.
 - Ver os pacotes do mesmo endereço juntos numa parada só, com todos os rastreios.
 - Conferir os avisos em amarelo (sem número, sem localização, endereço corrigido) e marcar cada um como conferido.
+- Ver um aviso quando o ponto no mapa de uma parada está longe das outras, e juntar paradas que são a mesma casa com a rua escrita de outro jeito.
 - Editar o endereço de uma parada, por exemplo para pôr o número da casa que está no pacote e não veio na planilha.
 - Baixar o arquivo para importar no Spoke: planilha no Android, lista em PDF no iPhone.
 - Seguir o passo a passo de importação dentro do app.

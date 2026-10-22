@@ -44,6 +44,8 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Expandir abreviações no começo do nome da rua (R., Av., Pça, Cel., Mal., Dr....), sem mexer no complemento, para não separar a mesma casa em duas paradas
 - [x] Tirar o "Parada N" dos cartões da conferência: o número era a ordem da planilha e confundia com a ordem da rota (o PDF continua numerado)
 - [x] Editar o endereço de uma parada na conferência, para pôr o número da casa que está no pacote e não na planilha; refaz o agrupamento, o arquivo e a conferência, e marca "editado por você". Só na memória
+- [x] Aviso amarelo quando o ponto no mapa de uma parada está longe das outras (mais de 15 km e 4 vezes mais longe que o normal da rota)
+- [x] Sugerir juntar paradas do mesmo CEP e número com a rua escrita de outro jeito; o entregador escolhe o endereço que fica ou diz que são lugares diferentes
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
 
 ## Etapa 4 — Outros apps de rota (v2.3)
