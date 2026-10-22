@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { findByFinal, MIN_SEARCH_DIGITS } from '../../core';
 import type { AddressEdit, DuplicatePair, RouteAppProfile, RouteResult, Stop } from '../../core/types';
 import { Banner } from '../components/ui';
 import { DuplicateCard } from '../components/DuplicateCard';
@@ -20,6 +21,9 @@ const pairKey = (d: DuplicatePair) => d.stops.map(keyOf).join('|');
 export function Review({ result, app, isExample, fileName, onEdit }: Props) {
   const { packages, stops, check, noAddress, duplicates } = result;
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState('');
+  const typed = query.replace(/\D/g, '');
+  const found = findByFinal(stops, query);
   // "são lugares diferentes" vale só enquanto a planilha está aberta
   const [apart, setApart] = useState<Set<string>>(new Set());
   const maybeSame = duplicates.filter((d) => !apart.has(pairKey(d)));
@@ -34,7 +38,7 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
       else next.add(key);
       return next;
     });
-  const card = (s: Stop, extra: { showWarnings?: boolean } = {}) => (
+  const card = (s: Stop, extra: { showWarnings?: boolean; found?: string[] } = {}) => (
     <StopCard
       key={keyOf(s)}
       stop={s}
@@ -83,6 +87,28 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
         </p>
       )}
 
+      <section className="group search" aria-label="Achar pacote pelo final do rastreio">
+        <label className="field">
+          Achar pacote pelo final do rastreio
+          <input
+            type="search"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="Ex.: os 4 números grandes da etiqueta"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </label>
+        {typed.length >= MIN_SEARCH_DIGITS && found.length === 0 && (
+          <p className="muted" role="status">Nenhum pacote termina em {typed}. Confira o número na etiqueta.</p>
+        )}
+        {found.length > 1 && (
+          <p className="note-info" role="status">
+            {found.length} paradas têm pacote terminando em {typed}. Confira o rastreio inteiro na etiqueta.
+          </p>
+        )}
+        {found.length > 0 && <ul className="stops">{found.map((m) => card(m.stop, { found: m.waybills }))}</ul>}
+      </section>
       {maybeSame.length > 0 && (
         <section className="group">
           <h2>Pode ser o mesmo endereço</h2>

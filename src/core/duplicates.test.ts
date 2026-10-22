@@ -55,7 +55,7 @@ describe('endereço repetido escrito de outro jeito', () => {
     const merged = buildRoute(editPackages(r.packages, other.packages.map((p) => p.waybill), { line1: keep.line1 }), r.noAddress, spoke);
     expect(merged.stops).toHaveLength(2);
     expect(merged.stops[0]).toMatchObject({ line1: 'Rua XV de Novembro, 72', line2: 'casa 2 / apto 3', edited: true });
-    expect(merged.stops[0].notes).toBe('2 PACOTES: 3320000000201 (casa 2) ; 3320000000202 (apto 3)');
+    expect(merged.stops[0].notes).toBe('0201, 0202 | 2 PACOTES: 3320000000201 (casa 2) ; 3320000000202 (apto 3)');
     expect(merged.duplicates).toEqual([]);
     expect(merged.check).toMatchObject({ ok: true, total: 3, stops: 2 });
   });

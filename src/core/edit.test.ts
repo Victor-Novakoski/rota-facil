@@ -20,7 +20,7 @@ describe('editar o endereço de uma parada', () => {
     const r = edit('49600000000055', 'Rua dos Testes, 50');
     const s = stopOf(r, '49600000000055');
     expect(s).toMatchObject({ line1: 'Rua dos Testes, 50', line2: 'Consultório odontológico', edited: true, warnings: [] });
-    expect(s.notes).toBe('1 pacote: 49600000000055 (Consultório odontológico)');
+    expect(s.notes).toBe('0055 | 1 pacote: 49600000000055 (Consultório odontológico)');
     expect(r.check).toMatchObject({ ok: true, total: 10, stops: 8 });
     expect(readSheets(r.sheet)[0][3]?.[0]).toBe('Rua dos Testes, 50');
   });
