@@ -136,3 +136,51 @@ test('planilha compartilhada pelo celular (ex.: WhatsApp) abre direto no app', a
   // a cópia temporária foi apagada
   expect(await page.evaluate(async () => (await (await caches.open('rota-facil-compartilhado')).keys()).length)).toBe(0);
 });
+
+test('avisa a parada longe das outras e junta o mesmo endereço escrito de dois jeitos', async ({ page }) => {
+  // planilha de exemplo + 3 entregas inventadas: uma com o ponto em outra cidade e duas na mesma casa
+  const wb0 = XLSX.read(readFileSync(FIXTURE));
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(wb0.Sheets[wb0.SheetNames[0]], { header: 1 });
+  const head = rows[0] as string[];
+  const extra = (waybill: string, zip: string, address: string, lat: string, lon: string) =>
+    head.map((h) => ({ 'Waybill No': waybill, 'Consignee Zip Code': zip, 'Consignee Province': 'Paraná', 'Consignee City': 'Curitiba', 'Consignee Area': 'Centro', 'Consignee Address': address, 'Consignee Latitude': lat, 'Consignee Longitude': lon })[h] ?? 'EXEMPLO');
+  const ws = XLSX.utils.aoa_to_sheet([
+    ...rows,
+    extra('3320000000301', '80000-020', 'Rua XV 72 casa 2', '-25.43700', '-49.27700'),
+    extra('3320000000302', '80000-020', 'R. XV de Novembro 72 apto 3', '-25.43700', '-49.27700'),
+    extra('3320000000303', '80000-030', 'Rua Longe Demais 5', '-23.55000', '-46.63000'),
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  const buffer = Buffer.from(XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+  await page.locator('#file').setInputFiles({ name: 'exemplo-avisos.xlsx', mimeType: 'application/octet-stream', buffer });
+
+  await expect(page.getByText('Conferido: 13 pacotes, nenhum perdido')).toBeVisible();
+  await expect(page.locator('.tile').nth(1)).toContainText('11');
+  await expect(page.locator('.tile').nth(2)).toContainText('7');
+  await expect(page.locator('.stop').filter({ hasText: 'Rua Longe Demais, 5' }).first()).toContainText('Ponto no mapa longe das outras paradas (uns 340 km)');
+  await expect(page.getByRole('radio', { name: /Rua XV de Novembro, 72/ })).toBeChecked();
+  if (process.env.SHOTS) {
+    await page.getByRole('heading', { name: 'Pode ser o mesmo endereço' }).evaluate((e) => e.scrollIntoView({ block: 'start' }));
+    await page.screenshot({ path: `${process.env.SHOTS}/1-sugestao.png` });
+    await page.getByText('Rua Longe Demais, 5').first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await page.screenshot({ path: `${process.env.SHOTS}/2-longe.png` });
+  }
+
+  await page.getByRole('button', { name: 'Juntar numa parada' }).click();
+  await expect(page.getByRole('heading', { name: 'Pode ser o mesmo endereço' })).toHaveCount(0);
+  await expect(page.locator('.tile').nth(1)).toContainText('10');
+  await expect(page.locator('.tile').nth(2)).toContainText('6');
+  await expect(page.getByText('Conferido: 13 pacotes, nenhum perdido')).toBeVisible();
+  if (process.env.SHOTS) {
+    await page.locator('.stop').filter({ hasText: 'Rua XV de Novembro, 72' }).first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await page.screenshot({ path: `${process.env.SHOTS}/3-juntado.png` });
+  }
+
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
+  const out = XLSX.read(readFileSync(await download.path()));
+  const outRows = XLSX.utils.sheet_to_json<unknown[]>(out.Sheets[out.SheetNames[0]], { header: 1 });
+  expect(outRows).toHaveLength(11);
+  const merged = outRows.find((r) => r[0] === 'Rua XV de Novembro, 72');
+  expect(merged?.[8]).toBe(2);
+});

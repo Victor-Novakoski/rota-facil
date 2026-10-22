@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { findByFinal, MIN_SEARCH_DIGITS } from '../../core';
-import type { AddressEdit, RouteAppProfile, RouteResult, Stop } from '../../core/types';
+import type { AddressEdit, DuplicatePair, RouteAppProfile, RouteResult, Stop } from '../../core/types';
 import { Banner } from '../components/ui';
+import { DuplicateCard } from '../components/DuplicateCard';
 import { StopCard } from '../components/StopCard';
 
 interface Props {
@@ -15,17 +16,21 @@ interface Props {
 
 /** Chave que não muda quando as paradas são refeitas depois de uma edição. */
 const keyOf = (s: Stop) => s.packages[0]?.waybill ?? String(s.no);
+const pairKey = (d: DuplicatePair) => d.stops.map(keyOf).join('|');
 
 export function Review({ result, app, isExample, fileName, onEdit }: Props) {
-  const { packages, stops, check, noAddress } = result;
+  const { packages, stops, check, noAddress, duplicates } = result;
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState('');
   const typed = query.replace(/\D/g, '');
   const found = findByFinal(stops, query);
+  // "são lugares diferentes" vale só enquanto a planilha está aberta
+  const [apart, setApart] = useState<Set<string>>(new Set());
+  const maybeSame = duplicates.filter((d) => !apart.has(pairKey(d)));
   // parada editada continua na lista de avisos, para o entregador ver o que mudou
   const warned = stops.filter((s) => s.warnings.length || s.edited);
   const multi = stops.filter((s) => s.packages.length > 1);
-  const pending = stops.filter((s) => s.warnings.length && !checked.has(keyOf(s))).length;
+  const pending = stops.filter((s) => s.warnings.length && !checked.has(keyOf(s))).length + maybeSame.length;
   const toggle = (key: string) =>
     setChecked((prev) => {
       const next = new Set(prev);
@@ -104,6 +109,22 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
         )}
         {found.length > 0 && <ul className="stops">{found.map((m) => card(m.stop, { found: m.waybills }))}</ul>}
       </section>
+      {maybeSame.length > 0 && (
+        <section className="group">
+          <h2>Pode ser o mesmo endereço</h2>
+          <p className="muted">O nome da rua veio escrito de jeitos diferentes. Se for a mesma casa, junte para virar uma parada só.</p>
+          <ul className="stops">
+            {maybeSame.map((d) => (
+              <DuplicateCard
+                key={pairKey(d)}
+                pair={d}
+                onMerge={(keep) => onEdit(d.stops[1 - keep].packages.map((p) => p.waybill), { line1: d.stops[keep].line1 })}
+                onDismiss={() => setApart((prev) => new Set(prev).add(pairKey(d)))}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
 
       {warned.length > 0 && (
         <section className="group">

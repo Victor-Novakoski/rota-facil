@@ -4,6 +4,9 @@
 
 - As notas do Spoke começam com os 4 últimos números de cada rastreio, os mesmos que aparecem grandes na etiqueta.
 - Na conferência dá para achar um pacote digitando o final do rastreio. Se dois pacotes têm o mesmo final, o app mostra os dois e avisa.
+- Aviso amarelo quando o ponto no mapa de uma parada está longe das outras (por exemplo, em outra cidade).
+- O app sugere juntar paradas do mesmo CEP e número com a rua escrita de outro jeito ("Rua XV 72" e "R. XV de Novembro 72"). O entregador escolhe o endereço que fica ou diz que são lugares diferentes.
+
 - Abreviações no começo do endereço (R., Av., Pça, Cel., Mal., Dr. e outras) são escritas por extenso. Assim a mesma casa escrita de dois jeitos vira uma parada só.
 - A planilha que chegou no WhatsApp abre direto no Rota Fácil: segure a mensagem, toque em Compartilhar e escolha Rota Fácil (Android, com o app instalado).
 - Ajuda com o passo a passo para abrir a planilha do WhatsApp no Android e no iPhone.
