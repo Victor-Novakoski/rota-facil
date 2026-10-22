@@ -24,7 +24,7 @@ App web gratuito que transforma a planilha de entregas do dia num arquivo pronto
 
 ## Destaques técnicos
 
-- **Privacidade por construção.** Não existe servidor. A planilha é lida e convertida no navegador; fontes e bibliotecas vão dentro do app, então a página não chama nenhum outro site.
+- **Privacidade por construção.** Não existe servidor. A planilha é lida e convertida no navegador; fontes e bibliotecas vão dentro do app, então a página não chama nenhum outro site. Uma Content Security Policy faz o próprio navegador barrar qualquer envio para fora, e um teste no navegador confere isso.
 - **Conferência que bloqueia.** Depois de gerar o arquivo, o app relê o que gravou e compara com a planilha de entrada: total de pacotes, cada rastreio exatamente uma vez, CEP, cidade, estado, números do endereço e coordenadas. Se algo não bater, o download não é liberado.
 - **Regras de endereço testadas com casos reais** (com dados inventados): complemento antes do número ("apto 91 430"), número repetido, rua sem número, "7 de Setembro" que não é número da casa, "Centro" sobrando no fim.
 - **Perfis plugáveis.** Uma transportadora nova ou um app de rota novo é um arquivo de perfil. O motor não muda.
@@ -119,7 +119,6 @@ As principais estão em [docs/MEMORY.md](docs/MEMORY.md): por que não há servi
 
 ## Próximos passos
 
-- Segurança: CSP e limite de tamanho da planilha.
 - Teste na rua com entregadores de verdade, no Android e no iPhone.
 - Outros apps de rota que aceitem rotas grandes no plano gratuito.
 - Outras transportadoras: Loggi, J&T, Shopee e Mercado Envios.

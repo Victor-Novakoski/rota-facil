@@ -1,10 +1,12 @@
 import { groupStops } from './group';
+import { checkFileSize, checkRowCount } from './limits';
 import { pickSheet, readPackages } from './read';
 import { readSheets, writeSheet } from './spreadsheet';
 import type { CarrierProfile, RouteAppProfile, RouteResult, Stop } from './types';
 import { verify } from './verify';
 
 export * from './types';
+export { checkFileSize, MAX_FILE_BYTES, MAX_ROWS } from './limits';
 export { cleanAddress, STREET_FIXES } from './address';
 export { CARRIERS, findCarrier } from './carriers';
 export { ROUTE_APPS, findRouteApp } from './route-apps';
@@ -16,6 +18,7 @@ export function buildRouteSheet(stops: Stop[], app: RouteAppProfile): ArrayBuffe
 
 /** Linhas já lidas -> paradas, arquivo pronto e conferência. */
 export function convertRows(rows: unknown[][], carrier: CarrierProfile, app: RouteAppProfile): RouteResult {
+  checkRowCount(rows.length);
   const { packages, noAddress } = readPackages(rows, carrier);
   const stops = groupStops(packages);
   const sheet = buildRouteSheet(stops, app);
@@ -25,5 +28,6 @@ export function convertRows(rows: unknown[][], carrier: CarrierProfile, app: Rou
 
 /** Arquivo da transportadora -> paradas, arquivo pronto e conferência. */
 export function convertFile(data: ArrayBuffer, carrier: CarrierProfile, app: RouteAppProfile): RouteResult {
+  checkFileSize(data.byteLength);
   return convertRows(pickSheet(readSheets(data), carrier), carrier, app);
 }

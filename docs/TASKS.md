@@ -1,6 +1,6 @@
 # TASKS – Rota Fácil
 
-**Etapa atual: 1 — Setup do repositório**
+**Etapa atual: 2 — Segurança**
 
 Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser feito.
 
@@ -26,9 +26,11 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 
 ## Etapa 2 — Segurança
 
-- [ ] Content Security Policy por `<meta>` no `index.html` (o GitHub Pages não deixa configurar cabeçalhos)
-- [ ] Limite de tamanho da planilha antes de ler (evitar travar o celular com arquivo enorme)
-- [ ] Revisar SECURITY.md e marcar o que muda
+- [x] Content Security Policy por `<meta>` no `index.html` (o GitHub Pages não deixa configurar cabeçalhos)
+- [x] Limite de tamanho da planilha antes de ler (evitar travar o celular com arquivo enorme)
+- [x] Limite de linhas por aba (um arquivo pequeno pode esconder muitas linhas compactadas)
+- [x] Teste no navegador: nada bloqueado no uso normal e envio para outro site barrado
+- [x] Revisar SECURITY.md e marcar o que muda
 
 ## Etapa 3 — Teste na rua (v2.1)
 

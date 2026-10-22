@@ -8,6 +8,8 @@ Tudo roda no navegador do celular. Não existe servidor nem banco de dados. O Gi
 Planilha .xlsx da base
         │  (escolhida pelo entregador, lida no próprio celular)
         ▼
+src/core/limits.ts        recusa arquivo acima de 5 MB ou com mais de 5.000 linhas
+        ▼
 src/core/spreadsheet.ts   lê as abas (SheetJS)
         ▼
 src/core/read.ts          acha o cabeçalho do perfil da transportadora

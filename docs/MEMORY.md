@@ -24,3 +24,9 @@ Decisões com trade-off e o porquê, por data e etapa.
 - **TypeScript 6.0 em vez de 7.0.** O typescript-eslint ainda não aceita o TypeScript 7.
 - **Conventional Commits conferido por um script na própria CI**, sem action de terceiro. Menos uma dependência para fixar e manter.
 - **Testes ao lado dos arquivos.** As planilhas de teste inventadas ficam em `src/core/fixtures/`.
+
+## 22/10/2026 — Etapa 2 (Segurança)
+
+- **CSP só no build.** O modo de desenvolvimento do Vite usa script inline e conexão com o próprio computador, que a CSP bloquearia. Um plugin pequeno no `vite.config.ts` coloca a `<meta>` só no arquivo publicado, e o teste no navegador roda nessa versão.
+- **CSP sem `'unsafe-inline'`.** O app não tem script nem estilo inline (o React aplica `style` pelo JavaScript, que a CSP permite). Mais rígido sem custo.
+- **Limite de 5 MB e 5.000 linhas.** A planilha real de um dia (57 pacotes) tem uns 9 KB, então os limites ficam muito acima do uso normal. O limite de linhas existe porque um .xlsx é compactado: um arquivo pequeno pode virar milhões de linhas ao abrir. O tamanho é conferido antes de ler o arquivo; as linhas, durante a leitura.
