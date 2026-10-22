@@ -54,6 +54,15 @@ describe('erros amigáveis', () => {
     expect(() => convertRows([Object.values(imile.columns)], imile, spoke)).toThrow(FriendlyError);
   });
 
+  it('junta o mesmo endereço escrito abreviado e por extenso', () => {
+    const h = ['Waybill No', 'Consignee Zip Code', 'Consignee Province', 'Consignee City', 'Consignee Area', 'Consignee Address', 'Delivery Associate', 'Consignee Longitude', 'Consignee Latitude'];
+    const row = (w: string, addr: string) => [w, '80000-011', 'Paraná', 'Curitiba', 'Centro', addr, 'X', '0', '0'];
+    const r = convertRows([h, row('3320000000601', 'R. Cel. Inventado 100 ap 1'), row('3320000000602', 'Rua Coronel Inventado 100 ap 2')], imile, spoke);
+    expect(r.stops).toHaveLength(1);
+    expect(r.stops[0]).toMatchObject({ line1: 'Rua Coronel Inventado, 100', line2: 'ap 1 / ap 2' });
+    expect(r.check.ok).toBe(true);
+  });
+
   it('separa pacote sem endereço', () => {
     const h = ['Waybill No', 'Consignee Zip Code', 'Consignee Province', 'Consignee City', 'Consignee Area', 'Consignee Address', 'Delivery Associate', 'Consignee Longitude', 'Consignee Latitude'];
     const r = convertRows([h, ['3320000000999', '80000-009', 'Paraná', 'Curitiba', 'Centro', '', 'X', '0', '0'], ['3320000000998', '80000-009', 'Paraná', 'Curitiba', 'Centro', 'Rua A 1', 'X', '0', '0']], imile, spoke);

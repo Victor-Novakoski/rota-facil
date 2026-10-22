@@ -40,6 +40,7 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Abrir a planilha direto do WhatsApp: o Rota Fácil aparece no "Compartilhar" do Android (o WhatsApp novo não mostra os documentos no seletor de arquivos)
 - [ ] Conferir num Android de verdade: compartilhar a planilha do WhatsApp com o Rota Fácil instalado
 - [ ] Corrigir o que aparecer, cada correção com teste
+- [x] Expandir abreviações no começo do nome da rua (R., Av., Pça, Cel., Mal., Dr....), sem mexer no complemento, para não separar a mesma casa em duas paradas
 - [x] Tirar o "Parada N" dos cartões da conferência: o número era a ordem da planilha e confundia com a ordem da rota (o PDF continua numerado)
 - [x] Editar o endereço de uma parada na conferência, para pôr o número da casa que está no pacote e não na planilha; refaz o agrupamento, o arquivo e a conferência, e marca "editado por você". Só na memória
 - [ ] Definir o número do WhatsApp para "Avisar um problema"

@@ -23,6 +23,30 @@ describe('cleanAddress', () => {
     expect(r.line2).toBe(line2);
   });
 
+  it.each([
+    // abreviações no começo do nome da rua
+    ['R. Cel. Inventado 100 ap 3', 'Rua Coronel Inventado, 100', 'ap 3'],
+    ['Av. Mal. Exemplo 45', 'Avenida Marechal Exemplo, 45', ''],
+    ['Pça Exemplo 10 loja 2', 'Praça Exemplo, 10', 'loja 2'],
+    ['R Dr Fictício 22', 'Rua Doutor Fictício, 22', ''],
+    ['Rua Ver. Exemplo 4', 'Rua Vereador Exemplo, 4', ''],
+    ['Trav. Teste 9 apto 12 bl B', 'Travessa Teste, 9', 'apto 12 bl B'],
+    ['R 15 de Novembro 300', 'Rua 15 de Novembro, 300', ''],
+    // o que não é para mexer
+    ['Rua Exemplo 120 Dr. Fulano consultório', 'Rua Exemplo, 120', 'Dr. Fulano consultório'], // complemento fica igual
+    ['Rua Cel 12', 'Rua Cel, 12', ''], // título sem nome depois não é título
+    ['Rua das Flores Dr. Exemplo 5', 'Rua das Flores Dr. Exemplo, 5', ''], // só no começo
+  ])('abreviação: %s', (raw, line1, line2) => {
+    const r = cleanAddress(raw, 'Centro');
+    expect(r.line1).toBe(line1);
+    expect(r.line2).toBe(line2);
+    expect(r.flags.fixes).toEqual([]);
+  });
+
+  it('o mesmo endereço escrito abreviado ou por extenso fica igual', () => {
+    expect(cleanAddress('R. Cel. Inventado 100').line1).toBe(cleanAddress('Rua Coronel Inventado 100').line1);
+  });
+
   it('corrige nomes conhecidos e avisa', () => {
     expect(cleanAddress('Marechal Deodoro 262').line1).toBe('Rua Marechal Deodoro, 262');
     expect(cleanAddress('barão de rio branco 10').line1).toBe('Rua Barão do Rio Branco, 10');

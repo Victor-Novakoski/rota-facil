@@ -2,6 +2,7 @@
 
 ## Ainda não publicado
 
+- Abreviações no começo do endereço (R., Av., Pça, Cel., Mal., Dr. e outras) são escritas por extenso. Assim a mesma casa escrita de dois jeitos vira uma parada só.
 - A planilha que chegou no WhatsApp abre direto no Rota Fácil: segure a mensagem, toque em Compartilhar e escolha Rota Fácil (Android, com o app instalado).
 - Ajuda com o passo a passo para abrir a planilha do WhatsApp no Android e no iPhone.
 - Dá para editar o endereço de uma parada na conferência (por exemplo, pôr o número da casa que está no pacote). O app refaz as paradas, o arquivo e a conferência, e marca "editado por você".

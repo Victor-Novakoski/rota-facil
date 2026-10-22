@@ -27,7 +27,7 @@ App web gratuito que transforma a planilha de entregas do dia num arquivo pronto
 
 - **Privacidade por construção.** Não existe servidor. A planilha é lida e convertida no navegador; fontes e bibliotecas vão dentro do app, então a página não chama nenhum outro site. Uma Content Security Policy faz o próprio navegador barrar qualquer envio para fora, e um teste no navegador confere isso.
 - **Conferência que bloqueia.** Depois de gerar o arquivo, o app relê o que gravou e compara com a planilha de entrada: total de pacotes, cada rastreio exatamente uma vez, CEP, cidade, estado, números do endereço e coordenadas. Se algo não bater, o download não é liberado.
-- **Regras de endereço testadas com casos reais** (com dados inventados): complemento antes do número ("apto 91 430"), número repetido, rua sem número, "7 de Setembro" que não é número da casa, "Centro" sobrando no fim.
+- **Regras de endereço testadas com casos reais** (com dados inventados): complemento antes do número ("apto 91 430"), número repetido, rua sem número, "7 de Setembro" que não é número da casa, "Centro" sobrando no fim, abreviações como "R. Cel." no começo da rua.
 - **Perfis plugáveis.** Uma transportadora nova ou um app de rota novo é um arquivo de perfil. O motor não muda.
 - **Motor separado da tela.** `src/core` é TypeScript puro, sem React, testado sozinho. A tela carrega o motor só quando o entregador abre uma planilha.
 - **Feito para a rua.** Botão principal sempre ao alcance do polegar, alto contraste para o sol, fontes de alta legibilidade e modo escuro automático.
