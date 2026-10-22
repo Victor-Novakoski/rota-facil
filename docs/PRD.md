@@ -32,6 +32,7 @@ Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
 | Agrupar pacotes por endereço + CEP | ✅ feito |
 | Avisos em amarelo (sem número, sem localização, endereço corrigido) | ✅ feito |
 | Marcar aviso como conferido | ✅ feito |
+| Expandir abreviações no começo do nome da rua (R., Av., Pça, Cel., Mal., Dr....), para juntar a mesma casa escrita de jeitos diferentes | ✅ feito |
 | Editar o endereço de uma parada na conferência (ex.: número da casa que está no pacote e não na planilha) | ✅ feito |
 | Cartões das paradas sem "Parada N" (o número era só a ordem da planilha, não da rota) | ✅ feito |
 | Conferência obrigatória antes de liberar o arquivo | ✅ feito |

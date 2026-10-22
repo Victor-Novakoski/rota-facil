@@ -14,6 +14,37 @@ export const STREET_FIXES: Array<[RegExp, string]> = [
   [/^Rua Pedro ivo/iu, 'Rua Pedro Ivo'],
 ];
 
+/**
+ * Abreviações comuns no começo do endereço. Só valem no início do nome da rua:
+ * primeiro o tipo (R., Av., Pça...), depois títulos (Cel., Dr., Mal....).
+ * Fora daí (ex.: "Dr. Fulano" no complemento) o texto fica como o cliente escreveu.
+ */
+export const STREET_TYPES: Record<string, string> = {
+  r: 'Rua', av: 'Avenida', ave: 'Avenida', pca: 'Praça', pc: 'Praça', al: 'Alameda', tv: 'Travessa', trav: 'Travessa',
+  rod: 'Rodovia', estr: 'Estrada', est: 'Estrada', lgo: 'Largo', lg: 'Largo',
+};
+export const NAME_TITLES: Record<string, string> = {
+  cel: 'Coronel', mal: 'Marechal', dr: 'Doutor', dra: 'Doutora', gen: 'General', pres: 'Presidente', prof: 'Professor',
+  profa: 'Professora', cap: 'Capitão', ten: 'Tenente', sgt: 'Sargento', maj: 'Major', alm: 'Almirante', brig: 'Brigadeiro',
+  dep: 'Deputado', gov: 'Governador', ver: 'Vereador', des: 'Desembargador', eng: 'Engenheiro', pe: 'Padre',
+  sto: 'Santo', sta: 'Santa', sra: 'Senhora', cons: 'Conselheiro', visc: 'Visconde', com: 'Comendador',
+};
+
+/** "R. Cel. Fulano 100" -> "Rua Coronel Fulano 100". Para no primeiro token que não é abreviação. */
+function expandAbbreviations(a: string): string {
+  const tk = a.split(' ');
+  let k = 0;
+  const key = (t: string) => plain(t).replace(/\.$/, '');
+  if (tk.length > 1 && STREET_TYPES[key(tk[0])]) tk[k++] = STREET_TYPES[key(tk[0])];
+  else if (tk.length > 1 && /^(rua|avenida|praca|alameda|travessa|rodovia|estrada|largo)$/.test(key(tk[0]))) k++;
+  // título só se depois dele vier mais alguma palavra (o nome), nunca um número
+  while (k < tk.length - 1 && NAME_TITLES[key(tk[k])] && !/^\d/.test(tk[k + 1])) {
+    tk[k] = NAME_TITLES[key(tk[k])];
+    k++;
+  }
+  return tk.join(' ');
+}
+
 /** Palavras de complemento usadas na regra "complemento antes do número". */
 export const COMPLEMENT_WORDS = ['apto', 'apt', 'ap', 'apê', 'ape', 'apartamento', 'loja', 'lj', 'sala', 'sl', 'bloco', 'bl', 'casa'];
 
@@ -46,6 +77,8 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
   // regra 3.1: vírgulas viram espaço
   let a = String(raw ?? '').replace(/\s*,\s*/g, ' ').replace(/\s+/g, ' ').trim();
   a = a.replace(/(^|\s)n[º°]\.?\s*(?=\d)/giu, '$1'); // "nº 12" -> "12"
+
+  a = expandAbbreviations(a);
 
   // regra 3.2: nomes conhecidos
   for (const [re, rep] of STREET_FIXES) {
