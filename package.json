@@ -1,6 +1,6 @@
 {
   "name": "rota-facil",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Converte a planilha de entregas do dia em arquivo para o app de rotas. Roda 100% no celular.",
   "scripts": {
     "dev": "vite",

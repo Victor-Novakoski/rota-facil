@@ -1,6 +1,6 @@
 # TASKS – Rota Fácil
 
-**Etapa atual: 2 — Segurança**
+**Etapa atual: 3 — Teste na rua**
 
 Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser feito.
 
@@ -24,7 +24,7 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] SheetJS atualizado para 0.20.3 (pacote oficial), sem alertas no `npm audit`
 - [ ] Victor: configurar no GitHub o ruleset das branches, o GitHub Pages e a exclusão automática de branches (passo a passo no PR)
 
-## Etapa 2 — Segurança
+## Etapa 2 — Segurança (v2.1.0)
 
 - [x] Content Security Policy por `<meta>` no `index.html` (o GitHub Pages não deixa configurar cabeçalhos)
 - [x] Limite de tamanho da planilha antes de ler (evitar travar o celular com arquivo enorme)
@@ -32,7 +32,7 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Teste no navegador: nada bloqueado no uso normal e envio para outro site barrado
 - [x] Revisar SECURITY.md e marcar o que muda
 
-## Etapa 3 — Teste na rua (v2.1)
+## Etapa 3 — Teste na rua (v2.2)
 
 - [ ] Testar num Android de verdade: abrir, instalar na tela inicial, converter e importar no Spoke
 - [ ] Testar num iPhone: PDF no "Import route manifest" do Spoke
@@ -40,12 +40,12 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [ ] Corrigir o que aparecer, cada correção com teste
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
 
-## Etapa 4 — Outros apps de rota (v2.2)
+## Etapa 4 — Outros apps de rota (v2.3)
 
 - [ ] Pesquisar quais apps de rota aceitam 40+ paradas de graça ou barato
 - [ ] Perfil do primeiro app escolhido em `src/core/route-apps/`
 
-## Etapa 5 — Outras transportadoras (v2.3)
+## Etapa 5 — Outras transportadoras (v2.4)
 
 - [ ] Conseguir planilhas de exemplo (com dados inventados) da Loggi, J&T, Shopee e Mercado Envios
 - [ ] Um perfil por transportadora em `src/core/carriers/`
