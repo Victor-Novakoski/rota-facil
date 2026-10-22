@@ -47,3 +47,27 @@ test('arquivo que não é planilha mostra erro amigável', async ({ page }) => {
   await page.locator('#file').setInputFiles({ name: 'foto.xlsx', mimeType: 'application/octet-stream', buffer: Buffer.from('isso não é uma planilha') });
   await expect(page.getByText('Não deu para usar essa planilha')).toBeVisible();
 });
+
+test('regras de segurança da página: nada bloqueado no uso normal e nenhum envio para outro site', async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as unknown as { violations: string[] }).violations = [];
+    document.addEventListener('securitypolicyviolation', (e) => (window as unknown as { violations: string[] }).violations.push(`${e.violatedDirective} ${e.blockedURI}`));
+  });
+  await page.goto('/');
+  await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveAttribute('content', /connect-src 'self'/);
+  await page.locator('#file').setInputFiles(FIXTURE);
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+  await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
+  await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Gerar PDF para iPhone/ }).click()]);
+  expect(await page.evaluate(() => (window as unknown as { violations: string[] }).violations)).toEqual([]);
+
+  // Uma tentativa de mandar dados para fora é barrada pelo navegador
+  const sent = await page.evaluate(() => fetch('https://example.com/', { method: 'POST', body: 'teste' }).then(() => 'enviado', () => 'bloqueado'));
+  expect(sent).toBe('bloqueado');
+  await expect.poll(() => page.evaluate(() => (window as unknown as { violations: string[] }).violations)).toEqual(['connect-src https://example.com/']);
+});
+
+test('arquivo grande demais é recusado', async ({ page }) => {
+  await page.locator('#file').setInputFiles({ name: 'enorme.xlsx', mimeType: 'application/octet-stream', buffer: Buffer.alloc(6 * 1024 * 1024) });
+  await expect(page.getByText(/grande demais \(6 MB\)/)).toBeVisible();
+});
