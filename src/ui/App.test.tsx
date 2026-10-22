@@ -32,4 +32,13 @@ describe('App', () => {
     await userEvent.upload(document.getElementById('file') as HTMLInputElement, file);
     expect(await screen.findByText('Não deu para usar essa planilha')).toBeInTheDocument();
   });
+
+  it('arquivo grande demais é recusado antes de ler', async () => {
+    localStorage.setItem('rota-facil:onboarded', '1');
+    render(<App />);
+    const file = new File(['x'], 'enorme.xlsx');
+    Object.defineProperty(file, 'size', { value: 20 * 1024 * 1024 });
+    await userEvent.upload(document.getElementById('file') as HTMLInputElement, file);
+    expect(await screen.findByText(/grande demais \(20 MB\)/)).toBeInTheDocument();
+  });
 });

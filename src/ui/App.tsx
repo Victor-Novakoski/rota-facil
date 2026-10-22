@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { findCarrier } from '../core/carriers';
+import { checkFileSize } from '../core/limits';
 import { findRouteApp } from '../core/route-apps';
 import { FriendlyError, type RouteResult } from '../core/types';
 import { Banner, Icon, Logo } from './components/ui';
@@ -56,6 +57,7 @@ export function App() {
     setToast(null);
     setBusy(true);
     try {
+      checkFileSize(file.size);
       let data: ArrayBuffer;
       try {
         data = await readFile(file);
