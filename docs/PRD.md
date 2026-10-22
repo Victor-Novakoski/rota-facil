@@ -32,6 +32,8 @@ Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
 | Agrupar pacotes por endereço + CEP | ✅ feito |
 | Avisos em amarelo (sem número, sem localização, endereço corrigido) | ✅ feito |
 | Marcar aviso como conferido | ✅ feito |
+| Editar o endereço de uma parada na conferência (ex.: número da casa que está no pacote e não na planilha) | ✅ feito |
+| Cartões das paradas sem "Parada N" (o número era só a ordem da planilha, não da rota) | ✅ feito |
 | Conferência obrigatória antes de liberar o arquivo | ✅ feito |
 | Arquivo para o Spoke no Android (.xlsx) | ✅ feito |
 | PDF para o "Import route manifest" do Spoke no iPhone | 🟡 parcial (gerado, ainda não testado no Spoke) |

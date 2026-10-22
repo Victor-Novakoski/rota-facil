@@ -33,6 +33,28 @@ test('marcar aviso como conferido diminui a contagem', async ({ page }) => {
   await expect(page.locator('.tile').nth(2)).toContainText('4');
 });
 
+test('editar o endereço refaz a conferência e o arquivo baixado já sai com o número', async ({ page }) => {
+  await page.locator('#file').setInputFiles(FIXTURE);
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+  await expect(page.getByText(/Parada \d/)).toHaveCount(0);
+
+  const card = page.locator('.stop').filter({ hasText: 'Rua dos Testes' }).first();
+  await card.getByRole('button', { name: 'Editar endereço' }).click();
+  // durante a edição o endereço fica dentro do campo, então o cartão é achado pelo formulário
+  const form = page.locator('.stop-edit');
+  await form.getByLabel('Rua e número').fill('Rua dos Testes, 50');
+  await form.getByRole('button', { name: 'Salvar' }).click();
+  await expect(page.locator('.stop').filter({ hasText: 'Rua dos Testes, 50' }).first()).toContainText('editado por você');
+  await expect(page.locator('.tile').nth(2)).toContainText('4');
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
+  const wb = XLSX.read(readFileSync(await download.path()));
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+  expect(rows).toHaveLength(9);
+  expect(rows.map((r) => r[0])).toContain('Rua dos Testes, 50');
+});
+
 test('planilha errada mostra as colunas que faltam', async ({ page }) => {
   const ws = XLSX.utils.aoa_to_sheet([['Waybill No', 'Endereco'], ['1', 'x']]);
   const wb = XLSX.utils.book_new();

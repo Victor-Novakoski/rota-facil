@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { findCarrier } from '../core/carriers';
 import { checkFileSize } from '../core/limits';
 import { findRouteApp } from '../core/route-apps';
-import { FriendlyError, type RouteResult } from '../core/types';
+import { FriendlyError, type AddressEdit, type RouteResult } from '../core/types';
 import { Banner, Icon, Logo } from './components/ui';
 import { EXAMPLE_ROWS } from './example';
 import { detectPlatform, prefs, readFile, saveFile, today } from './lib';
@@ -105,6 +105,21 @@ export function App() {
     }
   }
 
+  // Edição só na memória: nada é salvo no aparelho nem enviado
+  async function onEdit(waybills: string[], edit: AddressEdit) {
+    if (!loaded) return;
+    try {
+      const { buildRoute, editPackages } = await import('../core');
+      const { packages, noAddress } = loaded.result;
+      setLoaded({ ...loaded, result: buildRoute(editPackages(packages, waybills, edit), noAddress, app) });
+      // arquivo baixado antes da edição ficou velho
+      setToast((t) => (t && !t.bad ? { text: 'Endereço alterado. Baixe o arquivo de novo antes de importar.' } : null));
+    } catch (e) {
+      console.error(e);
+      setToast({ text: 'Não consegui alterar o endereço.', bad: true });
+    }
+  }
+
   const prefix = loaded?.isExample ? 'EXEMPLO ' : '';
   const canExport = !!loaded && loaded.result.check.ok;
 
@@ -171,7 +186,7 @@ export function App() {
           </Banner>
         )}
         {screen === 'home' && <Home carrier={carrier} app={app} onCarrier={changeCarrier} onApp={changeApp} onExample={() => void onExample()} />}
-        {screen === 'review' && loaded && <Review result={loaded.result} app={app} isExample={loaded.isExample} fileName={loaded.fileName} />}
+        {screen === 'review' && loaded && <Review result={loaded.result} app={app} isExample={loaded.isExample} fileName={loaded.fileName} onEdit={(w, e) => void onEdit(w, e)} />}
         {screen === 'help' && <Help app={app} platform={platform} />}
         {screen === 'about' && <About />}
       </div>

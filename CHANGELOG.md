@@ -4,6 +4,8 @@
 
 - A planilha que chegou no WhatsApp abre direto no Rota Fácil: segure a mensagem, toque em Compartilhar e escolha Rota Fácil (Android, com o app instalado).
 - Ajuda com o passo a passo para abrir a planilha do WhatsApp no Android e no iPhone.
+- Dá para editar o endereço de uma parada na conferência (por exemplo, pôr o número da casa que está no pacote). O app refaz as paradas, o arquivo e a conferência, e marca "editado por você".
+- Os cartões das paradas não mostram mais "Parada 1, 2, 3", que era só a ordem da planilha.
 
 ## 2.1.0 – 2026-10-22
 

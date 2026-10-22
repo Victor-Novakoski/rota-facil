@@ -25,6 +25,8 @@ export interface Package extends CleanAddress {
   state: string;
   lat: number | null;
   lon: number | null;
+  /** O entregador trocou o endereço na tela de conferência. */
+  edited?: boolean;
 }
 
 export type WarningKind = 'noCoords' | 'oddCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'oddZip';
@@ -47,6 +49,14 @@ export interface Stop {
   packages: Package[];
   notes: string;
   warnings: Warning[];
+  /** Algum pacote desta parada teve o endereço trocado pelo entregador. */
+  edited: boolean;
+}
+
+/** Endereço digitado pelo entregador. Sem complemento, cada pacote mantém o seu. */
+export interface AddressEdit {
+  line1: string;
+  line2?: string;
 }
 
 export type Cell = string | number | null;
