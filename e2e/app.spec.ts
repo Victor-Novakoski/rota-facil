@@ -26,6 +26,20 @@ test('converte a planilha de exemplo e baixa o arquivo do Spoke', async ({ page 
   expect(pdf.suggestedFilename()).toMatch(/\.pdf$/);
 });
 
+test('o voltar do celular troca de tela em vez de fechar o app', async ({ page }) => {
+  await page.locator('#file').setInputFiles(FIXTURE);
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+  await page.getByRole('button', { name: 'Ajuda' }).click();
+  await page.getByRole('button', { name: 'Sobre' }).click();
+  await page.goBack();
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('button', { name: /Abrir planilha do dia/ })).toBeVisible();
+  // a planilha nova entra normalmente depois de voltar
+  await page.locator('#file').setInputFiles(FIXTURE);
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+});
+
 test('marcar aviso como conferido diminui a contagem', async ({ page }) => {
   await page.getByRole('button', { name: 'Ver como funciona com um exemplo' }).click();
   await expect(page.getByText('Isto é um EXEMPLO')).toBeVisible();
