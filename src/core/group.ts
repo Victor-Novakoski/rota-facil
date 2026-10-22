@@ -1,5 +1,5 @@
 import type { Package, Stop, Warning } from './types';
-import { plain } from './text';
+import { lastDigits, plain } from './text';
 
 const inBrazil = (lat: number, lon: number) => lat >= -34.5 && lat <= 6 && lon >= -74.5 && lon <= -28;
 
@@ -24,7 +24,9 @@ export function groupStops(packages: Package[]): Stop[] {
     }
     const withCoord = items.find((it) => it.lat !== null && it.lon !== null);
     const parts = items.map((it) => it.waybill + (it.line2 ? ` (${noteComp(it.line2)})` : ''));
-    const notes = (items.length > 1 ? `${items.length} PACOTES: ` : '1 pacote: ') + parts.join(' ; ');
+    // os 4 últimos dígitos vêm primeiro: é o número grande da etiqueta, o que o entregador procura no pacote
+    const finals = items.map((it) => lastDigits(it.waybill)).join(', ');
+    const notes = `${finals} | ` + (items.length > 1 ? `${items.length} PACOTES: ` : '1 pacote: ') + parts.join(' ; ');
 
     // seção 5: avisos
     const warnings: Warning[] = [];
