@@ -1,0 +1,24 @@
+import { APP_VERSION, SUPPORT_WHATSAPP } from '../config';
+
+export function About() {
+  return (
+    <main className="screen">
+      <h1>Sobre o Rota Fácil</h1>
+      <section className="card">
+        <h2>Privacidade</h2>
+        <p>Tudo acontece no seu celular. A planilha é lida e convertida no próprio aparelho, e nenhum endereço ou rastreio é enviado para servidor nenhum.</p>
+        <p>O app não tem cadastro, não guarda suas planilhas e não usa ferramentas de rastreamento. Ele só lembra, no próprio celular, qual transportadora e app de rota você usou da última vez.</p>
+      </section>
+      <section className="card">
+        <h2>Quem faz</h2>
+        <p>O Rota Fácil é um app independente e gratuito, feito para entregadores. Não tem ligação com a iMile, com o Spoke nem com nenhuma transportadora. Ele lê planilhas compatíveis com as da iMile e gera arquivos para importar no Spoke.</p>
+      </section>
+      {SUPPORT_WHATSAPP && (
+        <a className="btn secondary" href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(`Rota Fácil ${APP_VERSION}: encontrei um problema`)}`} target="_blank" rel="noopener noreferrer">
+          Avisar um problema pelo WhatsApp
+        </a>
+      )}
+      <p className="muted small">Versão {APP_VERSION}</p>
+    </main>
+  );
+}
