@@ -43,6 +43,8 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Expandir abreviações no começo do nome da rua (R., Av., Pça, Cel., Mal., Dr....), sem mexer no complemento, para não separar a mesma casa em duas paradas
 - [x] Tirar o "Parada N" dos cartões da conferência: o número era a ordem da planilha e confundia com a ordem da rota (o PDF continua numerado)
 - [x] Editar o endereço de uma parada na conferência, para pôr o número da casa que está no pacote e não na planilha; refaz o agrupamento, o arquivo e a conferência, e marca "editado por você". Só na memória
+- [x] Notas do Spoke começam pelos 4 últimos dígitos de cada rastreio ("0011, 0022 | 2 PACOTES: ..."), sem tirar o rastreio inteiro que a conferência usa
+- [x] Busca na conferência pelo final do rastreio: mostra rua e complemento da parada; se dois pacotes têm o mesmo final, mostra os dois e avisa
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
 
 ## Etapa 4 — Outros apps de rota (v2.3)

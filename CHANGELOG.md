@@ -2,6 +2,8 @@
 
 ## Ainda não publicado
 
+- As notas do Spoke começam com os 4 últimos números de cada rastreio, os mesmos que aparecem grandes na etiqueta.
+- Na conferência dá para achar um pacote digitando o final do rastreio. Se dois pacotes têm o mesmo final, o app mostra os dois e avisa.
 - Abreviações no começo do endereço (R., Av., Pça, Cel., Mal., Dr. e outras) são escritas por extenso. Assim a mesma casa escrita de dois jeitos vira uma parada só.
 - A planilha que chegou no WhatsApp abre direto no Rota Fácil: segure a mensagem, toque em Compartilhar e escolha Rota Fácil (Android, com o app instalado).
 - Ajuda com o passo a passo para abrir a planilha do WhatsApp no Android e no iPhone.

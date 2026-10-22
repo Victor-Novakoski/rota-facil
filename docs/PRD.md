@@ -35,6 +35,8 @@ Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
 | Expandir abreviações no começo do nome da rua (R., Av., Pça, Cel., Mal., Dr....), para juntar a mesma casa escrita de jeitos diferentes | ✅ feito |
 | Editar o endereço de uma parada na conferência (ex.: número da casa que está no pacote e não na planilha) | ✅ feito |
 | Cartões das paradas sem "Parada N" (o número era só a ordem da planilha, não da rota) | ✅ feito |
+| Notas do app de rota começando pelos 4 últimos dígitos de cada rastreio (o número grande da etiqueta) | ✅ feito |
+| Achar o pacote na conferência digitando o final do rastreio, avisando quando dois pacotes têm o mesmo final | ✅ feito |
 | Conferência obrigatória antes de liberar o arquivo | ✅ feito |
 | Arquivo para o Spoke no Android (.xlsx) | ✅ feito |
 | PDF para o "Import route manifest" do Spoke no iPhone | 🟡 parcial (gerado, ainda não testado no Spoke) |
