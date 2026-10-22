@@ -19,6 +19,8 @@ src/core/address.ts       limpa o endereço: rua + número | complemento
         ▼
 src/core/group.ts         junta pacotes com o mesmo endereço + CEP
                           e calcula os avisos
+                          (src/core/edit.ts: se o entregador editar um endereço
+                          na tela, os pacotes mudam e tudo daqui para baixo roda de novo)
         ▼
 src/core/index.ts         monta o arquivo com o perfil do app de rota
         ▼

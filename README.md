@@ -18,6 +18,7 @@ App web gratuito que transforma a planilha de entregas do dia num arquivo pronto
 - Ver os endereços já arrumados: rua e número de um lado, complemento do outro.
 - Ver os pacotes do mesmo endereço juntos numa parada só, com todos os rastreios.
 - Conferir os avisos em amarelo (sem número, sem localização, endereço corrigido) e marcar cada um como conferido.
+- Editar o endereço de uma parada, por exemplo para pôr o número da casa que está no pacote e não veio na planilha.
 - Baixar o arquivo para importar no Spoke: planilha no Android, lista em PDF no iPhone.
 - Seguir o passo a passo de importação dentro do app.
 - Instalar na tela inicial e usar sem internet.
@@ -68,11 +69,12 @@ make help    # lista todos os comandos
 1. Rode `make dev` e abra http://localhost:5173 (no computador, use o modo celular do navegador).
 2. Passe pelas 3 telas de boas-vindas ou toque em **Pular**.
 3. Toque em **Ver como funciona com um exemplo**. Devem aparecer **10 pacotes, 8 paradas e 5 avisos**, com a faixa verde "Conferido: 10 pacotes, nenhum perdido".
-4. Em **Avisos para conferir**, toque em **Marcar como conferido** na parada 3. A contagem de avisos cai para 4.
-5. Abra **Endereços com vários pacotes**: a Rua das Flores, 120 tem 3 pacotes e os 3 complementos.
-6. Toque em **Baixar para o Spoke** e abra o arquivo: os cabeçalhos são `Address Line 1 … Notes`.
-7. Volte em **Nova planilha** e abra `src/core/fixtures/exemplo-imile-ficticio.xlsx`. O resultado é o mesmo do exemplo.
-8. Abra uma planilha qualquer que não seja da iMile: aparece o erro com as colunas que faltam, e nada é gerado.
+4. Em **Avisos para conferir**, toque em **Marcar como conferido** no primeiro aviso. A contagem de avisos cai para 4.
+5. Na **Rua Modelo** (sem número), toque em **Editar endereço**, escreva `Rua Modelo, 343` e salve. A parada ganha a marca "editado por você", o aviso some e a conferência continua verde.
+6. Abra **Endereços com vários pacotes**: a Rua das Flores, 120 tem 3 pacotes e os 3 complementos.
+7. Toque em **Baixar para o Spoke** e abra o arquivo: os cabeçalhos são `Address Line 1 … Notes`.
+8. Volte em **Nova planilha** e abra `src/core/fixtures/exemplo-imile-ficticio.xlsx`. O resultado é o mesmo do exemplo.
+9. Abra uma planilha qualquer que não seja da iMile: aparece o erro com as colunas que faltam, e nada é gerado.
 
 ## Testes
 
