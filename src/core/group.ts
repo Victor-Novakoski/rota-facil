@@ -6,11 +6,13 @@ const inBrazil = (lat: number, lon: number) => lat >= -34.5 && lat <= 6 && lon >
 /** Texto do complemento dentro das notas, sem parênteses dentro de parênteses. */
 const noteComp = (c: string) => c.replace(/\s*\(sem número\)$/, ', sem número').replace(/^, /, '');
 
-/** Seção 4 da referência: mesmo Address Line 1 + CEP = uma parada. */
+/** Seção 4 da referência: mesmo Address Line 1 + CEP = uma parada (sem número, também o mesmo ponto no mapa). */
 export function groupStops(packages: Package[]): Stop[] {
   const groups = new Map<string, Package[]>();
   for (const p of packages) {
-    const key = `${plain(p.line1)}|${p.zip.replace(/\D/g, '')}`;
+    // sem número, "Rua X" + CEP pode ser casas diferentes: só junta se o ponto no mapa também for o mesmo
+    const spot = p.flags.noNumber && p.lat !== null && p.lon !== null ? `|${p.lat.toFixed(4)},${p.lon.toFixed(4)}` : '';
+    const key = `${plain(p.line1)}|${p.zip.replace(/\D/g, '')}${spot}`;
     const list = groups.get(key);
     if (list) list.push(p);
     else groups.set(key, [p]);
@@ -40,6 +42,12 @@ export function groupStops(packages: Package[]): Stop[] {
     for (const fx of fixes) warnings.push({ kind: 'nameFixed', text: `Nome da rua corrigido: ${fx}.` });
     if (items.some((it) => it.flags.reordered)) {
       warnings.push({ kind: 'reordered', text: 'Endereço corrigido: o complemento estava antes do número. Confira o número da casa.' });
+    }
+    if (items.some((it) => it.flags.zipRange)) {
+      warnings.push({
+        kind: 'zipRange',
+        text: 'O endereço tinha a faixa de números do CEP (ex.: "de 1001 a 2999"), que foi tirada. Confira o número da casa na etiqueta.',
+      });
     }
     if (!/^\d{5}-\d{3}$/.test(first.zip)) warnings.push({ kind: 'oddZip', text: 'CEP estranho na planilha.' });
 

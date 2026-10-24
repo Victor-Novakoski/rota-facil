@@ -198,3 +198,34 @@ test('avisa a parada longe das outras e junta o mesmo endereço escrito de dois 
   const merged = outRows.find((r) => r[0] === 'Rua XV de Novembro, 72');
   expect(merged?.[8]).toBe(2);
 });
+
+test('tira a faixa de números do CEP do endereço e avisa para conferir o número', async ({ page }) => {
+  // entregas inventadas no formato que apareceu no teste na rua
+  const head = ['Waybill No', 'Consignee Zip Code', 'Consignee Province', 'Consignee City', 'Consignee Area', 'Consignee Address', 'Delivery Associate', 'Consignee Longitude', 'Consignee Latitude'];
+  const row = (waybill: string, address: string) => [waybill, '80000-040', 'Paraná', 'Curitiba', 'Centro', address, 'EXEMPLO', '-49.27000', '-25.43000'];
+  const ws = XLSX.utils.aoa_to_sheet([
+    head,
+    row('49600000000901', 'Avenida Inventada- de 1001/1002 a 2999/3000 Apto 1305 2500'),
+    row('3320000000902', 'Rua Exemplo (Torre Azul) 117 Ap 1020'),
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  const buffer = Buffer.from(XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+  await page.locator('#file').setInputFiles({ name: 'exemplo-faixa.xlsx', mimeType: 'application/octet-stream', buffer });
+
+  await expect(page.getByText('Conferido: 2 pacotes, nenhum perdido')).toBeVisible();
+  const stop = page.locator('.stop').filter({ hasText: 'Avenida Inventada, 2500' }).first();
+  await expect(stop).toContainText('faixa de números do CEP');
+  if (process.env.SHOTS) {
+    await stop.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await page.screenshot({ path: `${process.env.SHOTS}/1-faixa-do-cep.png` });
+  }
+
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
+  const out = XLSX.read(readFileSync(await download.path()));
+  const outRows = XLSX.utils.sheet_to_json<unknown[]>(out.Sheets[out.SheetNames[0]], { header: 1 });
+  expect(outRows.slice(1).map((r) => [r[0], r[1]])).toEqual([
+    ['Avenida Inventada, 2500', 'Apto 1305'],
+    ['Rua Exemplo, 117', 'Torre Azul Ap 1020'],
+  ]);
+});
