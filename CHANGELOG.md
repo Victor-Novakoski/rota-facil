@@ -1,5 +1,12 @@
 # O que mudou
 
+## A publicar
+
+- Endereço com a faixa de números do CEP colada na rua ("- de 1001/1002 a 2999/3000") não engana mais o app de rota: a faixa sai e a parada ganha aviso amarelo para conferir o número.
+- Nome do prédio entre parênteses na rua vai para o complemento.
+- Endereço editado sem vírgula ("Rua X 50") é gravado como "Rua X, 50".
+- Pacotes sem número na mesma rua só viram uma parada se estiverem no mesmo ponto do mapa.
+
 ## 2.2.1 – 2026-10-22
 
 - O botão voltar do Android não fecha mais o app: da Ajuda e do Sobre ele volta para a tela de antes, sem perder a planilha aberta, e da conferência volta para o início para abrir outra planilha.

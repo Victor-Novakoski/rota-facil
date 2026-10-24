@@ -58,6 +58,44 @@ describe('cleanAddress', () => {
     expect(cleanAddress('Rua Marechal Deodoro 1').flags.fixes).toHaveLength(0);
   });
 
+  // Teste na rua: sites como o da Shein colam a faixa de números do CEP no nome da rua,
+  // e o app de rota achava que o primeiro número da faixa era o da casa.
+  it.each([
+    ['Avenida Inventada- de 1001/1002 a 2999/3000 Apto 1305 2500', 'Avenida Inventada, 2500', 'Apto 1305'],
+    ['Avenida Inventada- de 1001/1002 a 2999/3000 edificio azul, apto 904', 'Avenida Inventada', 'edificio azul apto 904 (sem número)'],
+    ['Rua Fictícia - de 1395/1396 a 2049/2050 Apto 132', 'Rua Fictícia', 'Apto 132 (sem número)'],
+    ['Rua Fictícia- de 1395/1396 a 2049/2050, 1766, Apto 132', 'Rua Fictícia, 1766', 'Apto 132'],
+    ['Rua Fictícia de 1395/1396 a 2049/2050 1766', 'Rua Fictícia, 1766', ''], // sem o hífen
+    ['Rua Modelo - até 999/1000 45 casa 2', 'Rua Modelo, 45', 'casa 2'],
+    ['Rua Modelo - de 1001/1002 ao fim 1500', 'Rua Modelo, 1500', ''],
+    ['Rua Modelo - lado ímpar 77', 'Rua Modelo, 77', ''],
+    ['Rua Modelo - de 101 a 299 - lado ímpar 151', 'Rua Modelo, 151', ''],
+  ])('faixa do CEP: %s', (raw, line1, line2) => {
+    const r = cleanAddress(raw, 'Centro');
+    expect(r.line1).toBe(line1);
+    expect(r.line2).toBe(line2);
+    expect(r.flags.zipRange).toBe(true);
+  });
+
+  it('não confunde nome de rua com faixa do CEP', () => {
+    for (const raw of ['Rua 7 de Setembro 100', 'Rua Dois de Julho 10 apto 2', 'Rua do Lado Par 12']) {
+      expect(cleanAddress(raw).flags.zipRange).toBe(false);
+    }
+    expect(cleanAddress('Rua 7 de Setembro 100').line1).toBe('Rua 7 de Setembro, 100');
+  });
+
+  // Teste na rua: o Spoke tirou o número de "Rua X (Edifício Y), 117"
+  it.each([
+    ['Rua Exemplo (Torre Azul) 117 Ap 1020', 'Rua Exemplo, 117', 'Torre Azul Ap 1020'],
+    ['Rua Exemplo (Bloco 2) 50', 'Rua Exemplo, 50', 'Bloco 2'], // número dentro do parêntese não é o da casa
+    ['Rua Exemplo 50 apto 3 (fundos)', 'Rua Exemplo, 50', 'apto 3 (fundos)'], // depois do número fica onde está
+    ['Rua Exemplo (Torre 50 apto 3', 'Rua Exemplo (Torre, 50', 'apto 3'], // parêntese sem fechar: não esconde o número
+  ])('parênteses na rua vão para o complemento: %s', (raw, line1, line2) => {
+    const r = cleanAddress(raw, 'Centro');
+    expect(r.line1).toBe(line1);
+    expect(r.line2).toBe(line2);
+  });
+
   it('marca os casos especiais', () => {
     expect(cleanAddress('Marechal Exemplo apto 91 430').flags.reordered).toBe(true);
     expect(cleanAddress('Rua Modelo s/n').flags.noNumber).toBe(true);

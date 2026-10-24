@@ -49,6 +49,9 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Aviso amarelo quando o ponto no mapa de uma parada está longe das outras (mais de 15 km e 4 vezes mais longe que o normal da rota)
 - [x] Sugerir juntar paradas do mesmo CEP e número com a rua escrita de outro jeito; o entregador escolhe o endereço que fica ou diz que são lugares diferentes
 - [x] Botão voltar do Android troca de tela (Ajuda, Sobre, conferência → início) em vez de fechar o app, sem perder a planilha aberta
+- [x] Teste na rua (24/10): tirar a faixa de números do CEP colada na rua ("- de 1001/1002 a 2999/3000") e avisar em amarelo para conferir o número
+- [x] Teste na rua (24/10): nome do prédio entre parênteses sai da rua e vai para o complemento; endereço editado ganha a vírgula antes do número
+- [x] Teste na rua (24/10): pacotes sem número na mesma rua e CEP só viram uma parada se o ponto no mapa também for o mesmo
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
 
 ## Etapa 4 — Outros apps de rota (v2.3)

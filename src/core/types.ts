@@ -8,6 +8,8 @@ export interface AddressFlags {
   /** O complemento vinha antes do número ("apto 91 430"). */
   reordered: boolean;
   dupRemoved: boolean;
+  /** Tinha a faixa de números do CEP colada na rua ("- de 1001/1002 a 2999/3000"), que foi tirada. */
+  zipRange: boolean;
 }
 
 export interface CleanAddress {
@@ -29,7 +31,7 @@ export interface Package extends CleanAddress {
   edited?: boolean;
 }
 
-export type WarningKind = 'noCoords' | 'oddCoords' | 'farCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'oddZip';
+export type WarningKind = 'noCoords' | 'oddCoords' | 'farCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'zipRange' | 'oddZip';
 
 export interface Warning {
   kind: WarningKind;

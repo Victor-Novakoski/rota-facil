@@ -70,12 +70,33 @@ function stripTrailingArea(s: string, area: string): string {
   return t.replace(/^[\s\-–]+|[\s\-–]+$/g, '');
 }
 
+/**
+ * Faixa de números do CEP que alguns sites colam no nome da rua, copiada da base dos Correios:
+ * "Avenida Exemplo - de 1001/1002 a 2999/3000", "- até 999/1000", "- de 501 ao fim", "- lado ímpar".
+ * Não é o número da casa e confunde o app de rota, então sai do endereço.
+ */
+const N = String.raw`\d+(?:\s*/\s*\d+)?`;
+const SIDE = String.raw`lado\s+(?:par|[ií]mpar)`;
+const RANGE = String.raw`(?:de\s+${N}\s+(?:a|at[ée])\s+${N}|de\s+${N}\s+ao\s+fim|at[ée]\s+${N})(?:\s*[-–]\s*${SIDE})?|${SIDE}`;
+const ZIP_RANGE = new RegExp(
+  // com hífen antes, ou sem hífen quando vem no formato inconfundível "de 1001/1002 a 2999/3000"
+  String.raw`\s*[-–]\s*(?:${RANGE})(?=[\s,]|$)|\s+de\s+\d+\s*/\s*\d+\s+(?:a|at[ée])\s+\d+\s*/\s*\d+(?=[\s,]|$)`,
+  'giu',
+);
+
+/** Tira a faixa de números do CEP do texto. Também usada na conferência, para não cobrar esses números. */
+export function stripZipRange(raw: string): { text: string; removed: boolean } {
+  const text = String(raw ?? '').replace(ZIP_RANGE, ' ').replace(/\s+/g, ' ').trim();
+  return { text, removed: text !== String(raw ?? '').replace(/\s+/g, ' ').trim() };
+}
+
 /** Recebe o endereço como o cliente digitou e separa rua + número (line1) e complemento (line2). */
 export function cleanAddress(raw: string, area = ''): CleanAddress {
-  const flags = { fixes: [] as string[], noNumber: false, reordered: false, dupRemoved: false };
+  const range = stripZipRange(raw);
+  const flags = { fixes: [] as string[], noNumber: false, reordered: false, dupRemoved: false, zipRange: range.removed };
 
   // regra 3.1: vírgulas viram espaço
-  let a = String(raw ?? '').replace(/\s*,\s*/g, ' ').replace(/\s+/g, ' ').trim();
+  let a = range.text.replace(/\s*,\s*/g, ' ').replace(/\s+/g, ' ').trim();
   a = a.replace(/(^|\s)n[º°]\.?\s*(?=\d)/giu, '$1'); // "nº 12" -> "12"
 
   a = expandAbbreviations(a);
@@ -92,9 +113,21 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
 
   const tk = a.split(' ').filter(Boolean);
 
+  // o que está entre parênteses (nome do prédio, referência) nunca é o número da casa
+  // parêntese aberto e não fechado é ignorado, para não esconder o número que vem depois
+  const balanced = (a.match(/\(/g) ?? []).length === (a.match(/\)/g) ?? []).length;
+  const inParens: boolean[] = [];
+  let depth = 0;
+  for (const t of balanced ? tk : []) {
+    depth += (t.match(/\(/g) ?? []).length;
+    inParens.push(depth > 0);
+    depth = Math.max(0, depth - (t.match(/\)/g) ?? []).length);
+  }
+
   // regra 3.3: primeiro número (pulando nomes como "7 de Setembro" e "24 de Maio")
   let i = -1;
   for (let k = 1; k < tk.length; k++) {
+    if (inParens[k] === true) continue;
     if (isSN(tk[k])) { i = k; break; }
     if (isNum(tk[k]) && !/^(de|do|da)$/i.test(tk[k + 1] ?? '')) { i = k; break; }
   }
@@ -123,10 +156,14 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
     number = tk[i + 1];
     comp = [tk[i - 1], tk[i], ...tk.slice(i + 2)];
   } else if (i >= 2 && isCompWord(tk[i - 1])) {
-    // "Rua X apto 91" sem o número da casa
+    // "Rua X apto 91" sem o número da casa; "Rua X edifício Y apto 91" corta já no edifício
     flags.noNumber = true;
-    street = tk.slice(0, i - 1);
-    comp = tk.slice(i - 1);
+    let j = i - 1;
+    for (let k = 2; k < i - 1; k++) {
+      if (NO_NUMBER_SPLIT.includes(wordKey(tk[k]))) { j = k; break; }
+    }
+    street = tk.slice(0, j);
+    comp = tk.slice(j);
   } else {
     street = tk.slice(0, i);
     number = tk[i];
@@ -139,7 +176,14 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
     flags.dupRemoved = true;
   }
 
-  const st = street.join(' ').replace(/[\s\-–]+$/, '');
+  // parênteses no meio da rua vão para o complemento: o app de rota se perde com "Rua X (Edifício Y), 10"
+  let streetText = street.join(' ');
+  const inside = [...streetText.matchAll(/\(([^()]*)\)/g)].map((m) => m[1].trim()).filter(Boolean);
+  if (inside.length) {
+    streetText = streetText.replace(/\s*\([^()]*\)/g, ' ');
+    comp = [...inside, ...comp];
+  }
+  const st = streetText.replace(/\s+/g, ' ').trim().replace(/[\s\-–]+$/, '');
   let line2 = stripTrailingArea(comp.join(' '), area);
   if (flags.noNumber && !/^s\/n/i.test(line2)) line2 = `${line2 ? `${line2} ` : ''}(sem número)`;
 

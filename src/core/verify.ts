@@ -1,6 +1,7 @@
 import { readSheets } from './spreadsheet';
 import type { Package, RouteAppProfile, VerifyResult } from './types';
 import { cellText, digitsOf } from './text';
+import { stripZipRange } from './address';
 
 /**
  * Seção 6 da referência: relê o arquivo que vai para o entregador e compara com a planilha de entrada.
@@ -48,7 +49,8 @@ export function verify(sheet: ArrayBuffer, packages: Package[], app: RouteAppPro
 
     const outDigits = new Set(digitsOf(`${cellText(r[col.line1])} ${cellText(r[col.line2])}`));
     // endereço editado: confere com o que o entregador digitou, não com a planilha
-    const source = p.edited ? `${p.line1} ${p.line2}` : p.rawAddress;
+    // a faixa de números do CEP sai de propósito, então não conta como número perdido
+    const source = p.edited ? `${p.line1} ${p.line2}` : stripZipRange(p.rawAddress).text;
     const lost = digitsOf(source).filter((d) => !outDigits.has(d));
     if (lost.length) errors.push(`No pacote final ${end} sumiu o número ${lost.join(', ')} do endereço.`);
 
