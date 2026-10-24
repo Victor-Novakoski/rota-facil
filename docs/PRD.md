@@ -30,7 +30,7 @@ Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
 | Ler planilha .xlsx da iMile | ✅ feito |
 | Limpar endereço (regras 3.1 a 3.7 da referência técnica) | ✅ feito |
 | Agrupar pacotes por endereço + CEP | ✅ feito |
-| Avisos em amarelo (sem número, sem localização, endereço corrigido) | ✅ feito |
+| Avisos em amarelo (sem número, sem localização, endereço corrigido, faixa do CEP colada na rua) | ✅ feito |
 | Marcar aviso como conferido | ✅ feito |
 | Expandir abreviações no começo do nome da rua (R., Av., Pça, Cel., Mal., Dr....), para juntar a mesma casa escrita de jeitos diferentes | ✅ feito |
 | Editar o endereço de uma parada na conferência (ex.: número da casa que está no pacote e não na planilha) | ✅ feito |
