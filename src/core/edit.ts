@@ -11,7 +11,8 @@ const tidy = (s: string) => s.replace(/\s+/g, ' ').trim();
  */
 export function withNumberComma(line1: string): string {
   if (line1.includes(',') || /\b[A-Z]{2}[-\s]?\d+$/.test(line1)) return line1;
-  return line1.replace(/^(.*[^\d\s])\s+(\d+[A-Za-z]?)$/, '$1, $2');
+  // "Rua 7 100" -> "Rua 7, 100": o número no nome da rua fica onde está
+  return line1.replace(/^(.*\S)\s+(\d+[A-Za-z]?)$/, '$1, $2');
 }
 
 /**

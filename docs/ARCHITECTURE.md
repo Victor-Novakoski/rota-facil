@@ -23,7 +23,8 @@ src/core/group.ts         junta pacotes com o mesmo endereço + CEP
                           (src/core/edit.ts: se o entregador editar um endereço
                           na tela, os pacotes mudam e tudo daqui para baixo roda de novo)
         ▼
-src/core/far.ts           aviso da parada com o ponto no mapa longe das outras
+src/core/far.ts           aviso da parada com a localização da planilha longe das outras
+                          (a localização não vai para o Spoke; só serve para avisar)
 src/core/duplicates.ts    acha paradas do mesmo CEP e número com a rua escrita
                           diferente; juntar usa o mesmo caminho da edição
 src/core/search.ts        acha a parada pelo final do rastreio (busca da conferência)

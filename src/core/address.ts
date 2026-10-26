@@ -61,6 +61,20 @@ const isNum = (t: string) => /^\d+$/.test(t);
 const isSN = (t: string) => /^s\/n[º°]?\.?$/i.test(t) || /^s\.n\.?$/i.test(t);
 const isCompWord = (t: string) => COMPLEMENT_KEYS.includes(wordKey(t));
 
+/** Siglas de rodovia: "BR 116", "SC 401", "Rodovia PR 090". */
+const HIGHWAY_CODES = ['br', 'ac', 'al', 'ap', 'am', 'ba', 'ce', 'df', 'es', 'go', 'ma', 'mt', 'ms', 'mg', 'pa', 'pb', 'pr', 'pe', 'pi', 'rj', 'rn', 'rs', 'ro', 'rr', 'sc', 'sp', 'se', 'to'];
+const BARE_TYPES = ['rua', 'avenida', 'travessa', 'alameda', 'rodovia', 'estrada', 'praca'];
+
+/**
+ * O que vem antes do número é só o tipo, sem nome ("Rua", "Rodovia SC", "BR")?
+ * Então o número é o nome da rua ("Rua 7", "SC 401"), não o da casa.
+ */
+function isBareStreet(before: string[]): boolean {
+  const k = before.map(wordKey);
+  if (k.length === 1) return BARE_TYPES.includes(k[0]) || HIGHWAY_CODES.includes(k[0]);
+  return k.length === 2 && BARE_TYPES.includes(k[0]) && HIGHWAY_CODES.includes(k[1]);
+}
+
 /** Regra 3.5: tira "Centro" (ou o bairro da linha) que sobrou no fim do complemento. */
 function stripTrailingArea(s: string, area: string): string {
   let t = s;
@@ -125,10 +139,12 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
   }
 
   // regra 3.3: primeiro número (pulando nomes como "7 de Setembro" e "24 de Maio")
+  // e o número que é o próprio nome da rua: "Rua 7, 100", "Rodovia SC 401 5000"
   let i = -1;
   for (let k = 1; k < tk.length; k++) {
     if (inParens[k] === true) continue;
     if (isSN(tk[k])) { i = k; break; }
+    if (isNum(tk[k]) && isBareStreet(tk.slice(0, k))) continue;
     if (isNum(tk[k]) && !/^(de|do|da)$/i.test(tk[k + 1] ?? '')) { i = k; break; }
   }
 
@@ -164,6 +180,11 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
     }
     street = tk.slice(0, j);
     comp = tk.slice(j);
+  } else if (i >= 2 && wordKey(tk[i - 1]) === 'km') {
+    // rodovia: "BR 116 km 30" -> "BR 116, km 30"
+    street = tk.slice(0, i - 1);
+    number = `km ${tk[i]}`;
+    comp = tk.slice(i + 1);
   } else {
     street = tk.slice(0, i);
     number = tk[i];

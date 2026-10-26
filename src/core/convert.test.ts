@@ -29,13 +29,17 @@ describe('planilha de exemplo (10 entregas inventadas)', () => {
 
   it('mostra os avisos esperados', () => {
     const kinds = r.stops.map((s) => s.warnings.map((w) => w.kind));
-    expect(kinds).toEqual([[], [], ['noNumber'], ['reordered'], ['noNumber'], ['noCoords'], [], ['reordered']]);
+    expect(kinds).toEqual([[], [], ['noNumber'], ['reordered'], ['noNumber'], [], [], ['reordered']]);
   });
 
-  it('grava o arquivo com os cabeçalhos exatos do Spoke', () => {
+  it('grava o arquivo com os cabeçalhos exatos do Spoke, sem latitude e longitude', () => {
     const rows = readSheets(r.sheet)[0];
     expect(rows[0]).toEqual(spoke.headers);
-    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', '', '', 1, '0088 | 1 pacote: 3320000000088 (Cartório)']);
+    // o Spoke dava preferência ao ponto da planilha e ignorava o endereço corrigido
+    expect(rows[0]).not.toContain('Latitude');
+    expect(rows[0]).not.toContain('Longitude');
+    expect(rows[1]).toHaveLength(spoke.headers.length);
+    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', 1, '0088 | 1 pacote: 3320000000088 (Cartório)']);
   });
 });
 
@@ -135,5 +139,22 @@ describe('pacotes sem número na mesma rua e CEP', () => {
   it('sem ponto no mapa continua juntando pela rua e CEP', () => {
     const r = convertRows([h, row('3320000000804', 'Rua Fictícia', '0', '0'), row('3320000000805', 'Rua Fictícia', '0', '0')], imile, spoke);
     expect(r.stops).toHaveLength(1);
+  });
+});
+
+describe('rua com número no nome', () => {
+  const h = Object.values(imile.columns);
+  const row = (w: string, addr: string) => {
+    const r: string[] = h.map(() => '');
+    const set = (k: keyof typeof imile.columns, v: string) => (r[h.indexOf(imile.columns[k])] = v);
+    set('waybill', w); set('zip', '80000-040'); set('state', 'Paraná'); set('city', 'Curitiba'); set('area', 'Centro');
+    set('address', addr); set('lat', '0'); set('lon', '0');
+    return r;
+  };
+
+  it('casas diferentes da "Rua 7" ficam em paradas diferentes', () => {
+    const r = convertRows([h, row('3320000000901', 'Rua 7, 100'), row('3320000000902', 'Rua 7, 200'), row('3320000000903', 'Rua 7 100 casa 2')], imile, spoke);
+    expect(r.stops.map((s) => [s.line1, s.packages.length])).toEqual([['Rua 7, 100', 2], ['Rua 7, 200', 1]]);
+    expect(r.check).toMatchObject({ ok: true, total: 3, stops: 2 });
   });
 });

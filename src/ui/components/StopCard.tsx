@@ -107,7 +107,7 @@ function EditForm({ stop, onSave, onCancel }: { stop: Stop; onSave: (e: AddressE
         stop.line2 && <p className="small">Complementos: {stop.line2}</p>
       )}
       {error && <p className="field-error" role="alert">{error}</p>}
-      <p className="small">Só muda neste celular. O CEP e o ponto no mapa continuam os da planilha.</p>
+      <p className="small">Só muda neste celular. O CEP continua o da planilha.</p>
       <div className="stop-actions">
         <button type="submit" className="check-btn on">Salvar</button>
         <button type="button" className="check-btn" onClick={onCancel}>Cancelar</button>

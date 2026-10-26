@@ -91,6 +91,8 @@ describe('editar o endereço de uma parada', () => {
     expect(withNumberComma('Rua dos Testes, 50')).toBe('Rua dos Testes, 50');
     expect(withNumberComma('Rua dos Testes 50 fundos')).toBe('Rua dos Testes 50 fundos'); // número no meio: deixa como está
     expect(withNumberComma('Rodovia BR 116')).toBe('Rodovia BR 116');
+    expect(withNumberComma('Rua 7 100')).toBe('Rua 7, 100'); // número no nome da rua
+    expect(withNumberComma('SC 401 7000')).toBe('SC 401, 7000');
     expect(withNumberComma('Rua dos Testes')).toBe('Rua dos Testes');
   });
 

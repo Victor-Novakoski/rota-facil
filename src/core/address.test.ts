@@ -96,6 +96,23 @@ describe('cleanAddress', () => {
     expect(r.line2).toBe(line2);
   });
 
+  // Revisão: "Rua 7, 100" e "Rua 7, 200" viravam as duas "Rua, 7" e caíam numa parada só
+  it.each([
+    ['Rua 7, 100', 'Rua 7, 100', ''],
+    ['Rua 7 200 apto 3', 'Rua 7, 200', 'apto 3'],
+    ['R. 10 150', 'Rua 10, 150', ''],
+    ['Rua 7 apto 91 430', 'Rua 7, 430', 'apto 91'],
+    ['Rodovia SC 401 5000', 'Rodovia SC 401, 5000', ''],
+    ['SC 401 7000 galpão 2', 'SC 401, 7000', 'galpão 2'],
+    ['BR 116 km 30', 'BR 116, km 30', ''],
+    ['Rua 7', 'Rua 7', '(sem número)'], // só o nome: sem número da casa
+    ['Rua 7 apto 3', 'Rua 7', 'apto 3 (sem número)'],
+  ])('número no nome da rua: %s', (raw, line1, line2) => {
+    const r = cleanAddress(raw, 'Centro');
+    expect(r.line1).toBe(line1);
+    expect(r.line2).toBe(line2);
+  });
+
   it('marca os casos especiais', () => {
     expect(cleanAddress('Marechal Exemplo apto 91 430').flags.reordered).toBe(true);
     expect(cleanAddress('Rua Modelo s/n').flags.noNumber).toBe(true);

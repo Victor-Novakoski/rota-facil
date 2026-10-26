@@ -59,7 +59,7 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
 
       {check.ok && !noAddress.length && (
         <Banner tone="ok" title={`Conferido: ${packages.length} pacotes, nenhum perdido`}>
-          <p>Todos os rastreios, CEPs, números e localizações batem com a planilha{stops.some((s) => s.edited) ? ' e com o que você editou' : ''}.</p>
+          <p>Todos os rastreios, CEPs e números batem com a planilha{stops.some((s) => s.edited) ? ' e com o que você editou' : ''}.</p>
         </Banner>
       )}
       {check.ok && noAddress.length > 0 && (

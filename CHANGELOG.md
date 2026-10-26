@@ -6,6 +6,9 @@
 - Nome do prédio entre parênteses na rua vai para o complemento.
 - Endereço editado sem vírgula ("Rua X 50") é gravado como "Rua X, 50".
 - Pacotes sem número na mesma rua só viram uma parada se estiverem no mesmo ponto do mapa.
+- Rua com número no nome ("Rua 7, 100" e "Rua 7, 200") não junta mais casas diferentes numa parada só.
+- Telefone ou CEP escrito no complemento não trava mais a conferência.
+- O arquivo do Spoke não leva mais latitude e longitude: o Spoke acha cada parada pelo endereço, inclusive o que você corrigiu no app. O aviso "Sem localização" saiu.
 
 ## 2.2.1 – 2026-10-22
 

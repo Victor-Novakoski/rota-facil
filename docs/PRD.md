@@ -30,11 +30,12 @@ Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
 | Ler planilha .xlsx da iMile | ✅ feito |
 | Limpar endereço (regras 3.1 a 3.7 da referência técnica) | ✅ feito |
 | Agrupar pacotes por endereço + CEP | ✅ feito |
-| Avisos em amarelo (sem número, sem localização, endereço corrigido, faixa do CEP colada na rua) | ✅ feito |
+| Arquivo do app de rota sem latitude e longitude, para o app achar a parada pelo endereço (que o entregador pode corrigir) | ✅ feito |
+| Avisos em amarelo (sem número, endereço corrigido, faixa do CEP colada na rua) | ✅ feito |
 | Marcar aviso como conferido | ✅ feito |
 | Expandir abreviações no começo do nome da rua (R., Av., Pça, Cel., Mal., Dr....), para juntar a mesma casa escrita de jeitos diferentes | ✅ feito |
 | Editar o endereço de uma parada na conferência (ex.: número da casa que está no pacote e não na planilha) | ✅ feito |
-| Aviso da parada com o ponto no mapa longe das outras (ex.: em outra cidade) | ✅ feito |
+| Aviso quando a localização da planilha está longe das outras paradas (ex.: endereço de outra cidade) | ✅ feito |
 | Sugerir juntar paradas do mesmo CEP e número com a rua escrita diferente ("Rua XV 72" e "R. XV de Novembro 72"), com confirmação do entregador | ✅ feito |
 | Cartões das paradas sem "Parada N" (o número era só a ordem da planilha, não da rota) | ✅ feito |
 | Notas do app de rota começando pelos 4 últimos dígitos de cada rastreio (o número grande da etiqueta) | ✅ feito |
@@ -46,7 +47,7 @@ Tudo roda no próprio celular. Nenhum endereço ou rastreio sai do aparelho.
 | Abrir a planilha direto do WhatsApp pelo "Compartilhar" do Android | 🟡 parcial (feito e testado no navegador, falta testar num Android de verdade) |
 | Erro amigável com as colunas que faltam | ✅ feito |
 | Instalar na tela inicial e usar sem internet | 🟡 parcial (feito, ainda não testado em celular de verdade) |
-| Publicação no GitHub Pages | 🟡 parcial (workflow pronto, falta ligar o Pages) |
+| Publicação no GitHub Pages | 🟡 parcial (ligado e publicado, falta conferir no celular) |
 | Botão "Avisar um problema" pelo WhatsApp | 💭 a decidir (falta o número) |
 | Outros apps de rota (Circuit, Google Maps ou outro) | 💭 a decidir (pesquisar quais aceitam 40+ paradas) |
 | Outras transportadoras (Loggi, J&T, Shopee, Mercado Envios) | 💭 a decidir (precisa de planilha de exemplo de cada uma) |

@@ -23,7 +23,8 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] README no formato vitrine, com prints feitos com dados inventados
 - [x] SheetJS atualizado para 0.20.3 (pacote oficial), sem alertas no `npm audit`
 - [x] Testes no navegador da CI mais rápidos: imagem oficial do Playwright, que já tem o Chromium (antes levava uns 4 minutos só instalando)
-- [ ] Victor: configurar no GitHub o ruleset das branches, o GitHub Pages e a exclusão automática de branches (passo a passo no PR)
+- [x] Victor: ruleset das branches `main` e `develop` (ativo desde 22/10, conferido pelo GitHub em 26/10)
+- [ ] Victor: conferir se a exclusão automática de branches está ligada (Settings → General → Automatically delete head branches)
 
 ## Etapa 2 — Segurança (v2.1.0)
 
@@ -52,6 +53,10 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Teste na rua (24/10): tirar a faixa de números do CEP colada na rua ("- de 1001/1002 a 2999/3000") e avisar em amarelo para conferir o número
 - [x] Teste na rua (24/10): nome do prédio entre parênteses sai da rua e vai para o complemento; endereço editado ganha a vírgula antes do número
 - [x] Teste na rua (24/10): pacotes sem número na mesma rua e CEP só viram uma parada se o ponto no mapa também for o mesmo
+- [x] Revisão final (24/10): rua com número no nome ("Rua 7, 100", "Rodovia SC 401 5000", "BR 116 km 30") não junta casas diferentes numa parada só
+- [x] Revisão final (24/10): telefone ou CEP escrito no complemento e rastreio com letras não travam mais a conferência
+- [x] Victor (25/10): tirar Latitude e Longitude do arquivo do Spoke, que dava preferência ao ponto da planilha e ignorava o endereço corrigido; o aviso "Sem localização" sai
+- [ ] No próximo teste: conferir se o Spoke acha bem as paradas só pelo endereço, e se as paradas com parênteses e as editadas aparecem com número
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
 
 ## Etapa 4 — Outros apps de rota (v2.3)
@@ -72,5 +77,5 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 ## Deploy
 
 - [x] Workflow de publicação no GitHub Pages a cada merge na `main`
-- [ ] GitHub Pages ligado (Settings → Pages → Source: GitHub Actions)
+- [x] GitHub Pages ligado (a publicação da `main` rodou com sucesso em 22/10)
 - [ ] Primeira publicação conferida no celular

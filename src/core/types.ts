@@ -31,7 +31,7 @@ export interface Package extends CleanAddress {
   edited?: boolean;
 }
 
-export type WarningKind = 'noCoords' | 'oddCoords' | 'farCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'zipRange' | 'oddZip';
+export type WarningKind = 'oddCoords' | 'farCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'zipRange' | 'oddZip';
 
 export interface Warning {
   kind: WarningKind;
@@ -89,7 +89,7 @@ export interface RouteAppProfile {
   headers: string[];
   toRow: (stop: Stop) => Cell[];
   /** Nome das colunas da saída usadas na conferência. */
-  cols: Record<'line1' | 'line2' | 'city' | 'state' | 'zip' | 'lat' | 'lon' | 'packages' | 'notes', string>;
+  cols: Record<'line1' | 'line2' | 'city' | 'state' | 'zip' | 'packages' | 'notes', string>;
   sheetFileName: (isoDate: string) => string;
   /** Só para apps que leem uma lista em PDF (ex.: Spoke no iPhone). */
   pdfFileName?: (isoDate: string) => string;
