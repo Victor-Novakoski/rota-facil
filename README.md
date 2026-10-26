@@ -17,7 +17,7 @@ App web gratuito que transforma a planilha de entregas do dia num arquivo pronto
 - Abrir a planilha .xlsx que a base manda (compatível com planilhas da iMile).
 - Ver os endereços já arrumados: rua e número de um lado, complemento do outro.
 - Ver os pacotes do mesmo endereço juntos numa parada só, com todos os rastreios.
-- Conferir os avisos em amarelo (sem número, endereço corrigido, faixa de números do CEP colada na rua) e marcar cada um como conferido.
+- Conferir os avisos em amarelo (sem número, dois números seguidos, endereço corrigido, faixa de números do CEP colada na rua) e marcar cada um como conferido.
 - Ver um aviso quando a localização que veio na planilha está longe das outras paradas, e juntar paradas que são a mesma casa com a rua escrita de outro jeito.
 - Achar um pacote digitando o final do rastreio (os números grandes da etiqueta). No Spoke, as notas de cada parada também começam por esses números.
 - Editar o endereço de uma parada, por exemplo para pôr o número da casa que está no pacote e não veio na planilha.

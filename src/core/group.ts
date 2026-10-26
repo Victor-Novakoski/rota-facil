@@ -48,6 +48,12 @@ export function groupStops(packages: Package[]): Stop[] {
         text: 'O endereço tinha a faixa de números do CEP (ex.: "de 1001 a 2999"), que foi tirada. Confira o número da casa na etiqueta.',
       });
     }
+    if (items.some((it) => it.flags.twoNumbers)) {
+      warnings.push({
+        kind: 'twoNumbers',
+        text: 'O endereço tem dois números seguidos e o primeiro foi usado como número da casa. Confira na etiqueta qual é o certo.',
+      });
+    }
     if (!/^\d{5}-\d{3}$/.test(first.zip)) warnings.push({ kind: 'oddZip', text: 'CEP estranho na planilha.' });
 
     return {

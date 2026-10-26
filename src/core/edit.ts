@@ -34,7 +34,7 @@ export function editPackages(packages: Package[], waybills: string[], edit: Addr
       line2: noNumber ? line2 : line2.replace(SEM_NUMERO, ''),
       edited: true,
       // o entregador conferiu: só sobra o aviso de sem número, se ainda faltar
-      flags: { fixes: [], noNumber, reordered: false, dupRemoved: false, zipRange: false },
+      flags: { fixes: [], noNumber, reordered: false, dupRemoved: false, zipRange: false, twoNumbers: false },
     };
   });
 }

@@ -107,7 +107,7 @@ export function stripZipRange(raw: string): { text: string; removed: boolean } {
 /** Recebe o endereço como o cliente digitou e separa rua + número (line1) e complemento (line2). */
 export function cleanAddress(raw: string, area = ''): CleanAddress {
   const range = stripZipRange(raw);
-  const flags = { fixes: [] as string[], noNumber: false, reordered: false, dupRemoved: false, zipRange: range.removed };
+  const flags = { fixes: [] as string[], noNumber: false, reordered: false, dupRemoved: false, zipRange: range.removed, twoNumbers: false };
 
   // regra 3.1: vírgulas viram espaço
   let a = range.text.replace(/\s*,\s*/g, ' ').replace(/\s+/g, ' ').trim();
@@ -196,6 +196,10 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
     comp = comp.slice(1);
     flags.dupRemoved = true;
   }
+
+  // "Rua X 1807 464": dois números seguidos e nenhuma palavra dizendo qual é o apartamento ou a sala.
+  // Fica o primeiro como número da casa, mas o entregador confere. Até 5 dígitos, para não pegar telefone ou CEP.
+  if (number && /^\d{1,5}$/.test(number) && /^\d{1,5}$/.test(comp[0] ?? '')) flags.twoNumbers = true;
 
   // parênteses no meio da rua vão para o complemento: o app de rota se perde com "Rua X (Edifício Y), 10"
   let streetText = street.join(' ');
