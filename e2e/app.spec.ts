@@ -230,6 +230,42 @@ test('tira a faixa de números do CEP do endereço e avisa para conferir o núme
   ]);
 });
 
+test('avisa dois números seguidos no endereço e o aviso some depois de editar', async ({ page }) => {
+  // entrega inventada no formato que apareceu no teste na rua: "Rua X 1807 464"
+  const head = ['Waybill No', 'Consignee Zip Code', 'Consignee Province', 'Consignee City', 'Consignee Area', 'Consignee Address', 'Delivery Associate', 'Consignee Longitude', 'Consignee Latitude'];
+  const row = (waybill: string, address: string) => [waybill, '80000-050', 'Paraná', 'Curitiba', 'Centro', address, 'EXEMPLO', '-49.27000', '-25.43000'];
+  const ws = XLSX.utils.aoa_to_sheet([head, row('3320000001001', 'Rua Inventada 1807 464'), row('3320000001002', 'Rua Exemplo 50 apto 3')]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  const buffer = Buffer.from(XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
+  await page.locator('#file').setInputFiles({ name: 'exemplo-dois-numeros.xlsx', mimeType: 'application/octet-stream', buffer });
+
+  await expect(page.getByText('Conferido: 2 pacotes, nenhum perdido')).toBeVisible();
+  const stop = page.locator('.stop').filter({ hasText: 'Rua Inventada, 1807' }).first();
+  await expect(stop).toContainText('dois números seguidos');
+  if (process.env.SHOTS) {
+    await stop.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await page.screenshot({ path: `${process.env.SHOTS}/1-aviso-dois-numeros.png` });
+  }
+
+  await stop.getByRole('button', { name: 'Editar endereço' }).click();
+  const form = page.locator('.stop-edit');
+  await form.getByLabel('Rua e número').fill('Rua Inventada, 464');
+  await form.getByRole('button', { name: 'Salvar' }).click();
+  const edited = page.locator('.stop').filter({ hasText: 'Rua Inventada, 464' }).first();
+  await expect(edited).toContainText('editado por você');
+  await expect(edited).not.toContainText('dois números seguidos');
+  await expect(page.getByText('Conferido: 2 pacotes, nenhum perdido')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Ajuda' }).click();
+  const help = page.locator('section').filter({ hasText: 'O que os avisos amarelos querem dizer' });
+  await expect(help).toContainText('Dois números seguidos:');
+  if (process.env.SHOTS) {
+    await help.evaluate((e) => e.scrollIntoView({ block: 'start' }));
+    await page.screenshot({ path: `${process.env.SHOTS}/2-ajuda-avisos.png` });
+  }
+});
+
 test.describe('app atualizado com a tela aberta', () => {
   // sem o service worker, para o teste controlar o que o site devolve
   test.use({ serviceWorkers: 'block' });
