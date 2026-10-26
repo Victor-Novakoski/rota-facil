@@ -265,3 +265,19 @@ test('avisa dois números seguidos no endereço e o aviso some depois de editar'
     await page.screenshot({ path: `${process.env.SHOTS}/2-ajuda-avisos.png` });
   }
 });
+
+test.describe('app atualizado com a tela aberta', () => {
+  // sem o service worker, para o teste controlar o que o site devolve
+  test.use({ serviceWorkers: 'block' });
+
+  test('o PDF continua saindo mesmo se a parte do PDF sumir do site', async ({ page }) => {
+    await page.locator('#file').setInputFiles(FIXTURE);
+    await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+    // espera a parte do PDF carregar sozinha e depois "publica uma versão nova": a parte antiga some
+    await expect.poll(() => page.evaluate(() => performance.getEntriesByType('resource').some((e) => /\/pdf-[^/]*\.js$/.test(e.name)))).toBe(true);
+    await page.route(/\/pdf-[^/]*\.js$/, (route) => route.fulfill({ status: 404 }));
+
+    const [pdf] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Gerar PDF para iPhone/ }).click()]);
+    expect(pdf.suggestedFilename()).toMatch(/\.pdf$/);
+  });
+});

@@ -58,8 +58,8 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Victor (25/10): tirar Latitude e Longitude do arquivo do Spoke, que dava preferência ao ponto da planilha e ignorava o endereço corrigido; o aviso "Sem localização" sai
 - [x] Victor (26/10): aviso amarelo quando o endereço tem dois números seguidos sem "apto", "sala"... ("Rua X 1807 464"), para conferir qual é o número da casa
 - [x] Revisão final, item 10: a Ajuda explica todos os avisos (faixa do CEP, CEP estranho, ponto longe, fora do Brasil, pode ser o mesmo endereço, dois números), gerada de uma lista só
-- [ ] Revisão final, item 4: testes que estragam o arquivo de propósito (cidade, estado, cabeçalho, rastreio repetido, quantidade de pacotes, número digitado perdido)
-- [ ] Revisão final, item 7: PDF do iPhone depois de atualizar o app (carregar o PDF quando a conferência abre; mensagem para fechar e abrir se falhar)
+- [x] Revisão final, item 4: testes que estragam o arquivo de propósito (cidade, estado, cabeçalho, rastreio repetido, quantidade de pacotes, número digitado perdido)
+- [x] Revisão final, item 7: PDF do iPhone depois de atualizar o app (carregar o PDF quando a conferência abre; mensagem para fechar e abrir se falhar)
 - [ ] Marcas "Conferido" e "lugares diferentes" não podem sumir ao abrir a Ajuda e voltar (bug achado em 26/10)
 - [ ] Revisão final, item 6: desfazer depois de juntar paradas, "São lugares diferentes" e editar
 - [ ] Revisão final, item 5: "Voltar para a conferência" no início; perguntar antes de perder edições ao abrir outra planilha ou trocar transportadora/app
