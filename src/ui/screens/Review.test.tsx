@@ -47,7 +47,7 @@ describe('Review', () => {
 
   it('marcar um aviso como conferido diminui a contagem', async () => {
     render(<Editable />);
-    await userEvent.click(screen.getAllByRole('button', { name: 'Marcar como conferido' })[0]);
+    await userEvent.click(screen.getAllByRole('button', { name: 'Conferido' })[0]);
     expect(screen.getByText('avisos').previousSibling).toHaveTextContent('3');
     expect(screen.getByRole('button', { name: '✓ Conferido' })).toHaveAttribute('aria-pressed', 'true');
   });
@@ -101,10 +101,21 @@ describe('Review', () => {
 
   it('parada com vários pacotes só edita a rua e o número', async () => {
     render(<Editable />);
-    const card = warnCard('Rua das Flores, 120');
+    // sem aviso, a parada é editada pela busca
+    const search = screen.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
+    await userEvent.type(within(search).getByRole('searchbox'), '0022');
+    const card = within(search).getByText('Rua das Flores, 120').closest('li') as HTMLElement;
     await userEvent.click(within(card).getByRole('button', { name: 'Editar endereço' }));
     expect(within(card).queryByLabelText('Complemento')).not.toBeInTheDocument();
     expect(within(card).getByText('Complementos: apto 302 / Loja Exemplo / Apartamento 1001')).toBeInTheDocument();
+  });
+
+  it('"Editar endereço" só aparece nos avisos e na busca', () => {
+    render(<Editable />);
+    const multi = screen.getByRole('heading', { name: 'Endereços com vários pacotes' }).closest('section') as HTMLElement;
+    expect(within(multi).queryByRole('button', { name: 'Editar endereço' })).not.toBeInTheDocument();
+    const warned = screen.getByRole('heading', { name: 'Avisos para conferir' }).closest('section') as HTMLElement;
+    expect(within(warned).getAllByRole('button', { name: 'Editar endereço' })).toHaveLength(4);
   });
 
   it('acha a parada pelo final do rastreio e destaca o pacote', async () => {

@@ -71,7 +71,7 @@ make help    # lista todos os comandos
 1. Rode `make dev` e abra http://localhost:5173 (no computador, use o modo celular do navegador).
 2. Passe pelas 3 telas de boas-vindas ou toque em **Pular**.
 3. Toque em **Ver como funciona com um exemplo**. Devem aparecer **10 pacotes, 8 paradas e 4 avisos**, com a faixa verde "Conferido: 10 pacotes, nenhum perdido".
-4. Em **Avisos para conferir**, toque em **Marcar como conferido** no primeiro aviso. A contagem de avisos cai para 3.
+4. Em **Avisos para conferir**, toque em **Conferido** no primeiro aviso. A contagem de avisos cai para 3.
 5. Na **Rua Modelo** (sem número), toque em **Editar endereço**, escreva `Rua Modelo, 343` e salve. A parada ganha a marca "editado por você", o aviso some e a conferência continua verde.
 6. Abra **Endereços com vários pacotes**: a Rua das Flores, 120 tem 3 pacotes e os 3 complementos.
 7. Toque em **Baixar para o Spoke** e abra o arquivo: os cabeçalhos são `Address Line 1 … Notes`.

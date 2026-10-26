@@ -53,7 +53,18 @@ describe('App', () => {
     expect(screen.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeInTheDocument();
   });
 
-  it('arquivo que não é planilha mostra erro amigável', async () => {
+  it('depois de baixar, mostra como importar e no Android o PDF é um link discreto', async () => {
+    localStorage.setItem('rota-facil:onboarded', '1');
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: 'Ver como funciona com um exemplo' }));
+    expect(await screen.findByText('Conferido: 10 pacotes, nenhum perdido')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Gerar PDF para iPhone' })).toHaveClass('linkbtn');
+    await userEvent.click(screen.getByRole('button', { name: /Baixar para o Spoke/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Como importar no Spoke' }));
+    expect(screen.getByRole('heading', { name: 'Como importar no Spoke' })).toBeInTheDocument();
+  });
+
+    it('arquivo que não é planilha mostra erro amigável', async () => {
     localStorage.setItem('rota-facil:onboarded', '1');
     render(<App />);
     const file = new File(['isso não é uma planilha'], 'foto.xlsx');
@@ -152,7 +163,7 @@ describe('App', () => {
 
     it('"Conferido" não some ao abrir a Ajuda e voltar', async () => {
       await start();
-      await userEvent.click(screen.getAllByRole('button', { name: 'Marcar como conferido' })[0]);
+      await userEvent.click(screen.getAllByRole('button', { name: 'Conferido' })[0]);
       await userEvent.click(screen.getByRole('button', { name: 'Ajuda' }));
       await userEvent.click(screen.getByRole('button', { name: /Voltar/ }));
       expect(await screen.findByRole('button', { name: '✓ Conferido' })).toBeInTheDocument();
@@ -161,7 +172,7 @@ describe('App', () => {
     it('a página recarregou: volta na conferência com as edições e as marcas', async () => {
       await start();
       await editStreet('Rua dos Testes', 'Rua dos Testes, 50');
-      await userEvent.click(screen.getAllByRole('button', { name: 'Marcar como conferido' })[0]);
+      await userEvent.click(screen.getAllByRole('button', { name: 'Conferido' })[0]);
       cleanup();
 
       render(<App />);

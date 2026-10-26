@@ -40,7 +40,8 @@ export function Review({ result, app, isExample, fileName, checked, apart, onTog
       {...extra}
       checked={extra.showWarnings && checked.has(keyOf(s))}
       onToggle={extra.showWarnings ? () => onToggle(keyOf(s)) : undefined}
-      onEdit={(edit) => onEdit(s.packages.map((p) => p.waybill), edit, 'Editar endereço')}
+      // "Editar" só onde o entregador está conferindo (avisos e busca), para a lista ficar mais curta
+      onEdit={extra.showWarnings || extra.found ? (edit) => onEdit(s.packages.map((p) => p.waybill), edit, 'Editar endereço') : undefined}
     />
   );
 
@@ -124,7 +125,7 @@ export function Review({ result, app, isExample, fileName, checked, apart, onTog
       {warned.length > 0 && (
         <section className="group">
           <h2>Avisos para conferir</h2>
-          <p className="muted">Não impedem a rota. Olhe estas paradas com mais atenção. Se o pacote mostra um número que a planilha não tem, toque em Editar endereço.</p>
+          <p className="muted">Não impedem a rota. Olhe estas paradas com mais atenção. Se o pacote mostra um número que a planilha não tem, toque em Editar endereço. Para editar outra parada, ache pelo final do rastreio.</p>
           <ul className="stops">{warned.map((s) => card(s, { showWarnings: true }))}</ul>
         </section>
       )}

@@ -43,7 +43,7 @@ test('o voltar do celular troca de tela em vez de fechar o app', async ({ page }
 test('marcar aviso como conferido diminui a contagem', async ({ page }) => {
   await page.getByRole('button', { name: 'Ver como funciona com um exemplo' }).click();
   await expect(page.getByText('Isto é um EXEMPLO')).toBeVisible();
-  await page.getByRole('button', { name: 'Marcar como conferido' }).first().click();
+  await page.getByRole('button', { name: 'Conferido' }).first().click();
   await expect(page.locator('.tile').nth(2)).toContainText('3');
 });
 

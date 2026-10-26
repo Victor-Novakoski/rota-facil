@@ -57,7 +57,7 @@ export function StopCard({ stop, showWarnings, checked, onToggle, onEdit, found 
         <div className="stop-actions">
           {warn && onToggle && (
             <button type="button" className={`check-btn${checked ? ' on' : ''}`} aria-pressed={checked} onClick={onToggle}>
-              {checked ? '✓ Conferido' : 'Marcar como conferido'}
+              {checked ? '✓ Conferido' : 'Conferido'}
             </button>
           )}
           {onEdit && (
