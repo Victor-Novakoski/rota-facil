@@ -5,6 +5,7 @@ import { findRouteApp } from '../core/route-apps';
 import { FriendlyError, type AddressEdit, type RouteResult } from '../core/types';
 import { Banner, Icon, Logo } from './components/ui';
 import { EXAMPLE_ROWS } from './example';
+import { loadCore, loadPdf } from './lazy';
 import { detectPlatform, prefs, readFile, saveFile, today } from './lib';
 import { About } from './screens/About';
 import { Help } from './screens/Help';
@@ -64,9 +65,9 @@ export function App() {
       } catch {
         throw new FriendlyError('Não consegui abrir esse arquivo. Escolha a planilha .xlsx que a base mandou.');
       }
+      const { convertFile } = await loadCore();
       let result: RouteResult;
       try {
-        const { convertFile } = await import('../core');
         result = convertFile(data, carrier, app);
       } catch (e) {
         if (e instanceof FriendlyError) throw e;
@@ -96,7 +97,7 @@ export function App() {
     setProblem(null);
     setToast(null);
     try {
-      const { convertRows } = await import('../core');
+      const { convertRows } = await loadCore();
       setLoaded({ result: convertRows(EXAMPLE_ROWS, carrier, app), isExample: true, fileName: 'Exemplo' });
       go('review');
     } catch (e) {
@@ -108,16 +109,23 @@ export function App() {
   async function onEdit(waybills: string[], edit: AddressEdit) {
     if (!loaded) return;
     try {
-      const { buildRoute, editPackages } = await import('../core');
+      const { buildRoute, editPackages } = await loadCore();
       const { packages, noAddress } = loaded.result;
       setLoaded({ ...loaded, result: buildRoute(editPackages(packages, waybills, edit), noAddress, app) });
       // arquivo baixado antes da edição ficou velho
       setToast((t) => (t && !t.bad ? { text: 'Endereço alterado. Baixe o arquivo de novo antes de importar.' } : null));
     } catch (e) {
       console.error(e);
-      setToast({ text: 'Não consegui alterar o endereço.', bad: true });
+      setToast({ text: e instanceof FriendlyError ? e.message : 'Não consegui alterar o endereço.', bad: true });
     }
   }
+
+  // a parte do PDF carrega assim que a conferência abre: depois disso fica na memória e uma atualização do app
+  // no meio do dia não a tira mais (antes ela só carregava no toque do botão e podia já não existir)
+  const hasPdf = !!loaded && !!app.pdfFileName;
+  useEffect(() => {
+    if (hasPdf) loadPdf().catch(() => {});
+  }, [hasPdf]);
 
   const prefix = loaded?.isExample ? 'EXEMPLO ' : '';
   const canExport = !!loaded && loaded.result.check.ok;
@@ -130,8 +138,14 @@ export function App() {
   }
   async function downloadPdf() {
     if (!loaded || !canExport || !app.pdfFileName) return;
+    let buildManifestPdf;
     try {
-      const { buildManifestPdf } = await import('../core/pdf');
+      ({ buildManifestPdf } = await loadPdf());
+    } catch (e) {
+      setToast({ text: e instanceof FriendlyError ? e.message : 'Não consegui carregar o PDF.', bad: true });
+      return;
+    }
+    try {
       const name = prefix + app.pdfFileName(today().iso);
       saveFile(name, buildManifestPdf(loaded.result.stops, today().br));
       setToast({ text: `Pronto: “${name}” foi salvo.` });
