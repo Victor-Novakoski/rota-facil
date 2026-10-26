@@ -10,6 +10,8 @@ export interface AddressFlags {
   dupRemoved: boolean;
   /** Tinha a faixa de números do CEP colada na rua ("- de 1001/1002 a 2999/3000"), que foi tirada. */
   zipRange: boolean;
+  /** Dois números seguidos sem "apto", "sala"... ("1807 464"): o primeiro virou o da casa, o outro foi para o complemento. */
+  twoNumbers: boolean;
 }
 
 export interface CleanAddress {
@@ -31,7 +33,7 @@ export interface Package extends CleanAddress {
   edited?: boolean;
 }
 
-export type WarningKind = 'oddCoords' | 'farCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'zipRange' | 'oddZip';
+export type WarningKind = 'oddCoords' | 'farCoords' | 'noNumber' | 'nameFixed' | 'reordered' | 'zipRange' | 'oddZip' | 'twoNumbers';
 
 export interface Warning {
   kind: WarningKind;

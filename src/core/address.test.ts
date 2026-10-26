@@ -118,4 +118,27 @@ describe('cleanAddress', () => {
     expect(cleanAddress('Rua Modelo s/n').flags.noNumber).toBe(true);
     expect(cleanAddress('Avenida Exemplo 45 45').flags.dupRemoved).toBe(true);
   });
+
+  it.each([
+    ['Rua Inventada 1807 464', true], // o caso que motivou o aviso
+    ['Rua Inventada, 300, 12', true],
+    ['Rua 7 100 200', true], // número no nome da rua continua pulado
+    ['Rua Inventada 300', false],
+    ['Rua Inventada 300 apto 12', false],
+    ['Rua Inventada apto 91 430', false], // complemento antes do número já tem aviso próprio
+    ['Avenida Exemplo 45 45', false], // número repetido
+    ['Rua 7 100', false],
+    ['BR 116 km 30 5', false],
+    ["Rua Inventada 45 8'andar", false],
+    ['Rua Inventada 10 41999998888', false], // telefone não é número de casa
+    ['Rua Inventada 10 80000000', false], // CEP também não
+    ['Rua Inventada s/n 12', false],
+  ])('dois números seguidos: %s', (raw, expected) => {
+    expect(cleanAddress(raw, 'Centro').flags.twoNumbers).toBe(expected);
+  });
+
+  it('dois números seguidos: usa o primeiro e põe o outro no complemento', () => {
+    const r = cleanAddress('Rua Inventada 1807 464', 'Centro');
+    expect([r.line1, r.line2]).toEqual(['Rua Inventada, 1807', '464']);
+  });
 });

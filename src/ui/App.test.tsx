@@ -4,8 +4,15 @@ import { act, cleanup, render, screen, waitFor, within } from '@testing-library/
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { writeSheet } from '../core/spreadsheet';
+import { FriendlyError } from '../core/types';
 import { App } from './App';
 import { EXAMPLE_ROWS } from './example';
+import { loadPdf, UPDATED_MESSAGE } from './lazy';
+
+vi.mock('./lazy', async (importOriginal) => {
+  const real = await importOriginal<typeof import('./lazy')>();
+  return { ...real, loadPdf: vi.fn(real.loadPdf) };
+});
 
 describe('App', () => {
   beforeEach(() => {
@@ -29,6 +36,21 @@ describe('App', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Ver como funciona com um exemplo' }));
     expect(await screen.findByText('Conferido: 10 pacotes, nenhum perdido')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Baixar para o Spoke/ })).toBeEnabled();
+  });
+
+  it('carrega o PDF assim que a conferência abre e, se o app foi atualizado, pede para fechar e abrir', async () => {
+    localStorage.setItem('rota-facil:onboarded', '1');
+    vi.mocked(loadPdf).mockClear();
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: 'Ver como funciona com um exemplo' }));
+    expect(await screen.findByText('Conferido: 10 pacotes, nenhum perdido')).toBeInTheDocument();
+    expect(loadPdf).toHaveBeenCalledTimes(1);
+
+    vi.mocked(loadPdf).mockRejectedValueOnce(new FriendlyError(UPDATED_MESSAGE));
+    await userEvent.click(screen.getByRole('button', { name: /Gerar PDF para iPhone/ }));
+    expect(await screen.findByText(UPDATED_MESSAGE)).toBeInTheDocument();
+    // a conferência continua aberta: nada se perdeu
+    expect(screen.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeInTheDocument();
   });
 
   it('arquivo que não é planilha mostra erro amigável', async () => {
