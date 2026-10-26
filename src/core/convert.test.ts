@@ -137,3 +137,20 @@ describe('pacotes sem número na mesma rua e CEP', () => {
     expect(r.stops).toHaveLength(1);
   });
 });
+
+describe('rua com número no nome', () => {
+  const h = Object.values(imile.columns);
+  const row = (w: string, addr: string) => {
+    const r: string[] = h.map(() => '');
+    const set = (k: keyof typeof imile.columns, v: string) => (r[h.indexOf(imile.columns[k])] = v);
+    set('waybill', w); set('zip', '80000-040'); set('state', 'Paraná'); set('city', 'Curitiba'); set('area', 'Centro');
+    set('address', addr); set('lat', '0'); set('lon', '0');
+    return r;
+  };
+
+  it('casas diferentes da "Rua 7" ficam em paradas diferentes', () => {
+    const r = convertRows([h, row('3320000000901', 'Rua 7, 100'), row('3320000000902', 'Rua 7, 200'), row('3320000000903', 'Rua 7 100 casa 2')], imile, spoke);
+    expect(r.stops.map((s) => [s.line1, s.packages.length])).toEqual([['Rua 7, 100', 2], ['Rua 7, 200', 1]]);
+    expect(r.check).toMatchObject({ ok: true, total: 3, stops: 2 });
+  });
+});
