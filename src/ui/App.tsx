@@ -42,7 +42,7 @@ export function App() {
   const [undo, setUndo] = useState<Undo[]>([]);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [busy, setBusy] = useState(false);
-  const [toast, setToast] = useState<{ text: string; bad?: boolean } | null>(null);
+  const [toast, setToast] = useState<{ text: string; bad?: boolean; howTo?: boolean } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const { go } = nav;
@@ -255,7 +255,7 @@ export function App() {
     if (!loaded || !canExport) return;
     const name = prefix + app.sheetFileName(today().iso);
     saveFile(name, new Blob([loaded.result.sheet], { type: XLSX_MIME }));
-    setToast({ text: platform === 'android' ? `Pronto: “${name}” foi para a pasta Downloads.` : `Pronto: “${name}” foi salvo.` });
+    setToast({ text: platform === 'android' ? `Pronto: “${name}” foi para a pasta Downloads.` : `Pronto: “${name}” foi salvo.`, howTo: true });
   }
   async function downloadPdf() {
     if (!loaded || !canExport || !app.pdfFileName) return;
@@ -282,13 +282,18 @@ export function App() {
       <span className="lbl">Baixar para o {app.name}<small>planilha · Android</small></span>
     </button>
   );
+  // no Android o PDF é só um link discreto: quem usa é o iPhone
   const pdfBtn = (primary: boolean) =>
-    app.pdfFileName ? (
-      <button key="pdf" type="button" className={`btn${primary ? '' : ' secondary'}`} onClick={() => void downloadPdf()} disabled={!canExport}>
+    !app.pdfFileName ? null : primary ? (
+      <button key="pdf" type="button" className="btn" onClick={() => void downloadPdf()} disabled={!canExport}>
         <Icon name="pdf" size={26} />
         <span className="lbl">Gerar PDF para iPhone<small>lista de endereços</small></span>
       </button>
-    ) : null;
+    ) : (
+      <button key="pdf" type="button" className="linkbtn pdf-link" onClick={() => void downloadPdf()} disabled={!canExport}>
+        Gerar PDF para iPhone
+      </button>
+    );
 
   if (!onboarded) return <Onboarding onDone={finishOnboarding} />;
 
@@ -366,7 +371,17 @@ export function App() {
       )}
       {screen === 'review' && loaded && (
         <footer className="actionbar">
-          {toast && <p className={`toast${toast.bad ? ' bad' : ''}`} role="status">{toast.text}</p>}
+          {toast && (
+            <p className={`toast${toast.bad ? ' bad' : ''}`} role="status">
+              {toast.text}
+              {toast.howTo && (
+                <>
+                  {' '}
+                  <button type="button" className="linkbtn inline" onClick={() => go('help')}>Como importar no {app.name}</button>
+                </>
+              )}
+            </p>
+          )}
           {undo.length > 0 && (
             <button type="button" className="linkbtn undo" onClick={() => void onUndo()}>
               Desfazer: {undo.at(-1)?.label}
