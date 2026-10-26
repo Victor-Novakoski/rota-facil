@@ -13,14 +13,14 @@ test('converte a planilha de exemplo e baixa o arquivo do Spoke', async ({ page 
   await page.locator('#file').setInputFiles(FIXTURE);
   await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
   await expect(page.locator('.tile').nth(1)).toContainText('8');
-  await expect(page.locator('.tile').nth(2)).toContainText('5');
+  await expect(page.locator('.tile').nth(2)).toContainText('4');
 
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
   expect(download.suggestedFilename()).toMatch(/^Rota Spoke \d{4}-\d{2}-\d{2}\.xlsx$/);
   const wb = XLSX.read(readFileSync(await download.path()));
   const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0]], { header: 1 });
   expect(rows).toHaveLength(9);
-  expect(rows[0]).toEqual(['Address Line 1', 'Address Line 2', 'City', 'State', 'Zip/Postal Code', 'Country', 'Latitude', 'Longitude', 'Packages', 'Notes']);
+  expect(rows[0]).toEqual(['Address Line 1', 'Address Line 2', 'City', 'State', 'Zip/Postal Code', 'Country', 'Packages', 'Notes']);
 
   const [pdf] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Gerar PDF para iPhone/ }).click()]);
   expect(pdf.suggestedFilename()).toMatch(/\.pdf$/);
@@ -44,7 +44,7 @@ test('marcar aviso como conferido diminui a contagem', async ({ page }) => {
   await page.getByRole('button', { name: 'Ver como funciona com um exemplo' }).click();
   await expect(page.getByText('Isto é um EXEMPLO')).toBeVisible();
   await page.getByRole('button', { name: 'Marcar como conferido' }).first().click();
-  await expect(page.locator('.tile').nth(2)).toContainText('4');
+  await expect(page.locator('.tile').nth(2)).toContainText('3');
 });
 
 test('editar o endereço refaz a conferência e o arquivo baixado já sai com o número', async ({ page }) => {
@@ -59,7 +59,7 @@ test('editar o endereço refaz a conferência e o arquivo baixado já sai com o 
   await form.getByLabel('Rua e número').fill('Rua dos Testes, 50');
   await form.getByRole('button', { name: 'Salvar' }).click();
   await expect(page.locator('.stop').filter({ hasText: 'Rua dos Testes, 50' }).first()).toContainText('editado por você');
-  await expect(page.locator('.tile').nth(2)).toContainText('4');
+  await expect(page.locator('.tile').nth(2)).toContainText('3');
   await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
 
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
@@ -82,7 +82,7 @@ test('as notas começam pelo final do rastreio e a busca acha a parada', async (
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Baixar para o Spoke/ }).click()]);
   const wb = XLSX.read(readFileSync(await download.path()));
   const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-  expect(String(rows[1][9])).toMatch(/^0011, 0022, 0033 \| 3 PACOTES: /);
+  expect(String(rows[1][7])).toMatch(/^0011, 0022, 0033 \| 3 PACOTES: /);
 });
 
 test('planilha errada mostra as colunas que faltam', async ({ page }) => {
@@ -171,8 +171,8 @@ test('avisa a parada longe das outras e junta o mesmo endereço escrito de dois 
 
   await expect(page.getByText('Conferido: 13 pacotes, nenhum perdido')).toBeVisible();
   await expect(page.locator('.tile').nth(1)).toContainText('11');
-  await expect(page.locator('.tile').nth(2)).toContainText('7');
-  await expect(page.locator('.stop').filter({ hasText: 'Rua Longe Demais, 5' }).first()).toContainText('Ponto no mapa longe das outras paradas (uns 340 km)');
+  await expect(page.locator('.tile').nth(2)).toContainText('6');
+  await expect(page.locator('.stop').filter({ hasText: 'Rua Longe Demais, 5' }).first()).toContainText('A localização da planilha está longe das outras paradas (uns 340 km)');
   await expect(page.getByRole('radio', { name: /Rua XV de Novembro, 72/ })).toBeChecked();
   if (process.env.SHOTS) {
     await page.getByRole('heading', { name: 'Pode ser o mesmo endereço' }).evaluate((e) => e.scrollIntoView({ block: 'start' }));
@@ -184,7 +184,7 @@ test('avisa a parada longe das outras e junta o mesmo endereço escrito de dois 
   await page.getByRole('button', { name: 'Juntar numa parada' }).click();
   await expect(page.getByRole('heading', { name: 'Pode ser o mesmo endereço' })).toHaveCount(0);
   await expect(page.locator('.tile').nth(1)).toContainText('10');
-  await expect(page.locator('.tile').nth(2)).toContainText('6');
+  await expect(page.locator('.tile').nth(2)).toContainText('5');
   await expect(page.getByText('Conferido: 13 pacotes, nenhum perdido')).toBeVisible();
   if (process.env.SHOTS) {
     await page.locator('.stop').filter({ hasText: 'Rua XV de Novembro, 72' }).first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
@@ -196,7 +196,7 @@ test('avisa a parada longe das outras e junta o mesmo endereço escrito de dois 
   const outRows = XLSX.utils.sheet_to_json<unknown[]>(out.Sheets[out.SheetNames[0]], { header: 1 });
   expect(outRows).toHaveLength(11);
   const merged = outRows.find((r) => r[0] === 'Rua XV de Novembro, 72');
-  expect(merged?.[8]).toBe(2);
+  expect(merged?.[6]).toBe(2);
 });
 
 test('tira a faixa de números do CEP do endereço e avisa para conferir o número', async ({ page }) => {

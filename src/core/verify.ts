@@ -59,14 +59,6 @@ export function verify(sheet: ArrayBuffer, packages: Package[], app: RouteAppPro
     const source = p.edited ? `${p.line1} ${p.line2}` : stripZipRange(p.rawAddress).text;
     const lost = digitsOf(source).filter((d) => !outDigits.has(d));
     if (lost.length) errors.push(`No pacote final ${end} sumiu o número ${lost.join(', ')} do endereço.`);
-
-    if (p.lat !== null && p.lon !== null) {
-      const lat = r[col.lat];
-      const lon = r[col.lon];
-      const sameStop = packages.filter((q) => rowOf(q.waybill) === ri);
-      const ok = typeof lat === 'number' && typeof lon === 'number' && sameStop.some((q) => q.lat === lat && q.lon === lon);
-      if (!ok) errors.push(`A localização do pacote final ${end} não confere com a planilha.`);
-    }
   }
 
   return { ok: errors.length === 0, errors: [...new Set(errors)], total, stops: rows.length };

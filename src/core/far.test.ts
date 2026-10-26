@@ -30,7 +30,7 @@ describe('parada longe das outras', () => {
     const r = convertRows([h, ...city.map(([la, lo], i) => row(i + 1, la, lo)), row(9, -23.55, -46.63)], imile, spoke);
     const far = r.stops.filter((s) => s.warnings.some((w) => w.kind === 'farCoords'));
     expect(far.map((s) => s.line1)).toEqual(['Rua Inventada J, 109']);
-    expect(far[0].warnings.at(-1)?.text).toBe('Ponto no mapa longe das outras paradas (uns 340 km). Pode estar em outra cidade. Confira antes de importar.');
+    expect(far[0].warnings.at(-1)?.text).toBe('A localização da planilha está longe das outras paradas (uns 340 km). O endereço pode ser de outra cidade. Confira no app de rota se a parada caiu no lugar certo.');
     expect(r.check.ok).toBe(true);
   });
 

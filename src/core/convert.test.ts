@@ -29,13 +29,17 @@ describe('planilha de exemplo (10 entregas inventadas)', () => {
 
   it('mostra os avisos esperados', () => {
     const kinds = r.stops.map((s) => s.warnings.map((w) => w.kind));
-    expect(kinds).toEqual([[], [], ['noNumber'], ['reordered'], ['noNumber'], ['noCoords'], [], ['reordered']]);
+    expect(kinds).toEqual([[], [], ['noNumber'], ['reordered'], ['noNumber'], [], [], ['reordered']]);
   });
 
-  it('grava o arquivo com os cabeçalhos exatos do Spoke', () => {
+  it('grava o arquivo com os cabeçalhos exatos do Spoke, sem latitude e longitude', () => {
     const rows = readSheets(r.sheet)[0];
     expect(rows[0]).toEqual(spoke.headers);
-    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', '', '', 1, '0088 | 1 pacote: 3320000000088 (Cartório)']);
+    // o Spoke dava preferência ao ponto da planilha e ignorava o endereço corrigido
+    expect(rows[0]).not.toContain('Latitude');
+    expect(rows[0]).not.toContain('Longitude');
+    expect(rows[1]).toHaveLength(spoke.headers.length);
+    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', 1, '0088 | 1 pacote: 3320000000088 (Cartório)']);
   });
 });
 

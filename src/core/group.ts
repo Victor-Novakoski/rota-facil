@@ -32,10 +32,9 @@ export function groupStops(packages: Package[]): Stop[] {
 
     // seção 5: avisos
     const warnings: Warning[] = [];
-    if (!withCoord) {
-      warnings.push({ kind: 'noCoords', text: 'Sem localização no mapa (veio 0 na planilha). O app de rota vai procurar pelo endereço escrito.' });
-    } else if (withCoord.lat !== null && withCoord.lon !== null && !inBrazil(withCoord.lat, withCoord.lon)) {
-      warnings.push({ kind: 'oddCoords', text: 'Localização fora do Brasil. Confira o ponto no mapa.' });
+    // a localização da planilha não vai para o app de rota, mas um ponto estranho indica endereço estranho
+    if (withCoord && withCoord.lat !== null && withCoord.lon !== null && !inBrazil(withCoord.lat, withCoord.lon)) {
+      warnings.push({ kind: 'oddCoords', text: 'A localização da planilha está fora do Brasil. Confira no app de rota se a parada caiu no lugar certo.' });
     }
     if (items.some((it) => it.flags.noNumber)) warnings.push({ kind: 'noNumber', text: 'Sem número no endereço.' });
     const fixes = [...new Set(items.flatMap((it) => it.flags.fixes))];
