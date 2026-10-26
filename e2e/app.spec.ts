@@ -229,3 +229,38 @@ test('tira a faixa de números do CEP do endereço e avisa para conferir o núme
     ['Rua Exemplo, 117', 'Torre Azul Ap 1020'],
   ]);
 });
+
+test('recarregar a página não perde as edições e dá para desfazer', async ({ page }) => {
+  await page.locator('#file').setInputFiles(FIXTURE);
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+  const card = page.locator('.stop').filter({ hasText: 'Rua dos Testes' }).first();
+  await card.getByRole('button', { name: 'Editar endereço' }).click();
+  await page.locator('.stop-edit').getByLabel('Rua e número').fill('Rua dos Testes, 50');
+  await page.locator('.stop-edit').getByRole('button', { name: 'Salvar' }).click();
+  await expect(page.getByRole('button', { name: 'Desfazer: Editar endereço' })).toBeVisible();
+  if (process.env.SHOTS) {
+    await page.locator('.stop').filter({ hasText: 'Rua dos Testes, 50' }).first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await page.screenshot({ path: `${process.env.SHOTS}/1-desfazer.png` });
+  }
+
+  // recarregou sem querer: volta direto na conferência, com a edição
+  await page.reload();
+  await expect(page.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeVisible();
+  await expect(page.locator('.stop').filter({ hasText: 'Rua dos Testes, 50' }).first()).toContainText('editado por você');
+
+  // no início, a planilha continua aberta
+  await page.getByRole('button', { name: /Nova planilha/ }).click();
+  const resume = page.getByRole('region', { name: 'Planilha aberta' });
+  await expect(resume).toContainText('1 endereço editado');
+  if (process.env.SHOTS) await page.screenshot({ path: `${process.env.SHOTS}/2-voltar-para-conferencia.png` });
+  await resume.getByRole('button', { name: 'Voltar para a conferência' }).click();
+  await expect(page.locator('.stop').filter({ hasText: 'Rua dos Testes, 50' }).first()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Sobre' }).click();
+  await page.getByRole('button', { name: 'Apagar agora os dados deste celular' }).click();
+  if (process.env.SHOTS) await page.screenshot({ path: `${process.env.SHOTS}/3-apagar-dados.png`, fullPage: true });
+  await page.reload();
+  await page.getByRole('button', { name: /Voltar/ }).click();
+  await expect(page.getByRole('button', { name: /Abrir planilha do dia/ })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Planilha aberta' })).toHaveCount(0);
+});

@@ -25,7 +25,7 @@ Checklist para toda mudança:
 - [ ] Nenhum dado da planilha sai do celular: sem `fetch`, analytics ou serviço externo com conteúdo.
 - [ ] Nenhuma planilha real, endereço real ou nome de cliente no repositório, em teste, em commit, em print ou em mensagem. Testes e prints só com dados inventados.
 - [ ] Nada de `dangerouslySetInnerHTML` com dado da planilha. O React escapa o texto; não contornar.
-- [ ] `localStorage` só para preferências (transportadora, app de rota, boas-vindas vistas). Nunca dados da planilha.
+- [ ] `localStorage` só para preferências (transportadora, app de rota, boas-vindas vistas) e para a conferência do dia (`src/ui/session.ts`), que é apagada no dia seguinte, ao abrir outra planilha ou no botão "Apagar agora" do Sobre. Nenhum outro dado da planilha. O exemplo não é guardado.
 - [ ] Nenhum segredo no código. O app não tem variáveis secretas.
 - [ ] Dependência nova é necessária, mantida e passa no `npm audit --omit=dev --audit-level=high`.
 - [ ] Não usar nome ou logo de transportadora ou app de rota como se fossem nossos. Pode: "compatível com planilhas da iMile", "para importar no Spoke".

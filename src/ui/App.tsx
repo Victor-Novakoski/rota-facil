@@ -2,19 +2,27 @@ import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { findCarrier } from '../core/carriers';
 import { checkFileSize } from '../core/limits';
 import { findRouteApp } from '../core/route-apps';
-import { FriendlyError, type AddressEdit, type RouteResult } from '../core/types';
+import { FriendlyError, type AddressEdit, type Package, type RouteResult } from '../core/types';
 import { Banner, Icon, Logo } from './components/ui';
 import { EXAMPLE_ROWS } from './example';
 import { detectPlatform, prefs, readFile, saveFile, today } from './lib';
 import { About } from './screens/About';
 import { Help } from './screens/Help';
 import { useScreenHistory } from './navigation';
+import { clearReview, readReview, saveReview, type SavedReview } from './session';
 import { onLaunchFile, takeSharedFile } from './shared';
 import { Home } from './screens/Home';
 import { Onboarding } from './screens/Onboarding';
 import { Review } from './screens/Review';
 
 interface Loaded { result: RouteResult; isExample: boolean; fileName: string }
+/** "Conferido" e "São lugares diferentes" ficam aqui, e não na tela, para não sumirem ao abrir a Ajuda. */
+interface Marks { checked: Set<string>; apart: Set<string> }
+/** O que o "Desfazer" volta: os pacotes de antes da edição, ou um "São lugares diferentes". */
+type Undo = { label: string; packages: Package[] } | { label: string; apart: string };
+
+const NO_MARKS: Marks = { checked: new Set(), apart: new Set() };
+const MAX_UNDO = 20;
 interface Problem { message: string; details: string[] }
 
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -29,6 +37,8 @@ export function App() {
 
   const nav = useScreenHistory();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
+  const [marks, setMarks] = useState<Marks>(NO_MARKS);
+  const [undo, setUndo] = useState<Undo[]>([]);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; bad?: boolean } | null>(null);
@@ -43,16 +53,52 @@ export function App() {
       console.error(e);
       setProblem({ message: fallback, details: [] });
     }
-    setLoaded(null);
     go('home');
   };
 
-  const changeCarrier = (id: string) => { setCarrierId(id); prefs.set('carrier', id); setLoaded(null); };
-  const changeApp = (id: string) => { setAppId(id); prefs.set('routeApp', id); setLoaded(null); };
+  /** Troca a planilha aberta: zera marcas e desfazer, e a guardada no celular passa a ser a nova. */
+  const open = (next: Loaded | null, nextMarks: Marks = NO_MARKS) => {
+    setLoaded(next);
+    setMarks(nextMarks);
+    setUndo([]);
+    if (!next || next.isExample) clearReview();
+  };
+
+  // o que o entregador perderia se abrisse outra planilha agora
+  const edits = loaded && !loaded.isExample ? loaded.result.packages.filter((p) => p.edited).length : 0;
+  const worked = edits > 0 || marks.checked.size > 0 || marks.apart.size > 0;
+  const confirmDiscard = () =>
+    !worked ||
+    window.confirm(
+      edits
+        ? `Você editou ${edits === 1 ? '1 endereço' : `${edits} endereços`} na planilha aberta. Abrir outra e perder as edições?`
+        : 'Você já conferiu parte da planilha aberta. Abrir outra e perder o que marcou?',
+    );
+
+  const changeCarrier = (id: string) => {
+    if (!confirmDiscard()) return;
+    setCarrierId(id);
+    prefs.set('carrier', id);
+    open(null);
+  };
+  // trocar o app de rota não perde nada: os mesmos pacotes viram o arquivo do outro app
+  async function changeApp(id: string) {
+    setAppId(id);
+    prefs.set('routeApp', id);
+    if (!loaded) return;
+    try {
+      const { buildRoute } = await import('../core');
+      const { packages, noAddress } = loaded.result;
+      setLoaded({ ...loaded, result: buildRoute(packages, noAddress, findRouteApp(id)) });
+    } catch (e) {
+      console.error(e);
+      open(null);
+    }
+  }
   const finishOnboarding = () => { prefs.set('onboarded', '1'); setOnboarded(true); };
 
   async function onFile(file: File | undefined) {
-    if (!file) return;
+    if (!file || !confirmDiscard()) return;
     setProblem(null);
     setToast(null);
     setBusy(true);
@@ -72,7 +118,7 @@ export function App() {
         if (e instanceof FriendlyError) throw e;
         throw new FriendlyError('Não consegui ler esse arquivo como planilha. Escolha a planilha .xlsx que a base mandou. Nenhum arquivo foi gerado.');
       }
-      setLoaded({ result, isExample: false, fileName: file.name });
+      open({ result, isExample: false, fileName: file.name });
       go('review');
     } catch (e) {
       fail(e, 'Algo deu errado ao ler a planilha. Nenhum arquivo foi gerado.');
@@ -93,29 +139,105 @@ export function App() {
   }, []);
 
   async function onExample() {
+    if (!confirmDiscard()) return;
     setProblem(null);
     setToast(null);
     try {
       const { convertRows } = await import('../core');
-      setLoaded({ result: convertRows(EXAMPLE_ROWS, carrier, app), isExample: true, fileName: 'Exemplo' });
+      open({ result: convertRows(EXAMPLE_ROWS, carrier, app), isExample: true, fileName: 'Exemplo' });
       go('review');
     } catch (e) {
       fail(e, 'Algo deu errado no exemplo.');
     }
   }
 
-  // Edição só na memória: nada é salvo no aparelho nem enviado
-  async function onEdit(waybills: string[], edit: AddressEdit) {
+  // A conferência de hoje que ficou guardada no celular volta sozinha (ex.: a página recarregou sem querer)
+  const restore = useEffectEvent((saved: SavedReview, core: typeof import('../core')) => {
+    if (loaded) return; // já abriu outra planilha (ex.: chegou pelo "Compartilhar")
+    if (saved.carrierId !== carrier.id) {
+      clearReview();
+      return;
+    }
+    setLoaded({ result: core.buildRoute(saved.packages, saved.noAddress, app), isExample: false, fileName: saved.fileName });
+    setMarks({ checked: new Set(saved.checked), apart: new Set(saved.apart) });
+  });
+  useEffect(() => {
+    const saved = readReview();
+    if (!saved) return;
+    import('../core')
+      .then((core) => restore(saved, core))
+      .catch((e: unknown) => {
+        console.error(e);
+        clearReview();
+      });
+  }, []);
+
+  // Guarda a cada mudança. Só no celular, nada é enviado; o exemplo não é guardado
+  useEffect(() => {
+    if (!loaded || loaded.isExample) return;
+    saveReview({
+      carrierId: carrier.id,
+      fileName: loaded.fileName,
+      packages: loaded.result.packages,
+      noAddress: loaded.result.noAddress,
+      checked: [...marks.checked],
+      apart: [...marks.apart],
+    });
+  }, [loaded, marks, carrier.id]);
+
+  const pushUndo = (u: Undo) => setUndo((prev) => [...prev, u].slice(-MAX_UNDO));
+
+  async function rebuild(packages: Package[]) {
+    if (!loaded) return;
+    const { buildRoute } = await import('../core');
+    setLoaded({ ...loaded, result: buildRoute(packages, loaded.result.noAddress, app) });
+    // arquivo baixado antes da mudança ficou velho
+    setToast((t) => (t && !t.bad ? { text: 'Endereço alterado. Baixe o arquivo de novo antes de importar.' } : null));
+  }
+
+  async function onEdit(waybills: string[], edit: AddressEdit, label: string) {
     if (!loaded) return;
     try {
-      const { buildRoute, editPackages } = await import('../core');
-      const { packages, noAddress } = loaded.result;
-      setLoaded({ ...loaded, result: buildRoute(editPackages(packages, waybills, edit), noAddress, app) });
+      const { editPackages } = await import('../core');
+      const { packages } = loaded.result;
+      await rebuild(editPackages(packages, waybills, edit));
+      pushUndo({ label, packages });
       // arquivo baixado antes da edição ficou velho
-      setToast((t) => (t && !t.bad ? { text: 'Endereço alterado. Baixe o arquivo de novo antes de importar.' } : null));
     } catch (e) {
       console.error(e);
       setToast({ text: 'Não consegui alterar o endereço.', bad: true });
+    }
+  }
+
+  const toggleChecked = (key: string) =>
+    setMarks((m) => {
+      const checked = new Set(m.checked);
+      if (checked.has(key)) checked.delete(key);
+      else checked.add(key);
+      return { ...m, checked };
+    });
+  const markApart = (key: string) => {
+    setMarks((m) => ({ ...m, apart: new Set(m.apart).add(key) }));
+    pushUndo({ label: 'São lugares diferentes', apart: key });
+  };
+
+  async function onUndo() {
+    const last = undo.at(-1);
+    if (!last) return;
+    setUndo((prev) => prev.slice(0, -1));
+    if ('apart' in last) {
+      setMarks((m) => {
+        const apart = new Set(m.apart);
+        apart.delete(last.apart);
+        return { ...m, apart };
+      });
+      return;
+    }
+    try {
+      await rebuild(last.packages);
+    } catch (e) {
+      console.error(e);
+      setToast({ text: 'Não consegui desfazer.', bad: true });
     }
   }
 
@@ -184,10 +306,32 @@ export function App() {
             {problem.details.length > 0 && <ul>{problem.details.map((d) => <li key={d}>{d}</li>)}</ul>}
           </Banner>
         )}
-        {screen === 'home' && <Home carrier={carrier} app={app} onCarrier={changeCarrier} onApp={changeApp} onExample={() => void onExample()} />}
-        {screen === 'review' && loaded && <Review result={loaded.result} app={app} isExample={loaded.isExample} fileName={loaded.fileName} onEdit={(w, e) => void onEdit(w, e)} />}
+        {screen === 'home' && (
+          <Home
+            carrier={carrier}
+            app={app}
+            onCarrier={changeCarrier}
+            onApp={(id) => void changeApp(id)}
+            onExample={() => void onExample()}
+            open={loaded && !loaded.isExample ? { fileName: loaded.fileName, packages: loaded.result.packages.length, edits } : undefined}
+            onResume={() => go('review')}
+          />
+        )}
+        {screen === 'review' && loaded && (
+          <Review
+            result={loaded.result}
+            app={app}
+            isExample={loaded.isExample}
+            fileName={loaded.fileName}
+            checked={marks.checked}
+            apart={marks.apart}
+            onToggle={toggleChecked}
+            onApart={markApart}
+            onEdit={(w, e, label) => void onEdit(w, e, label)}
+          />
+        )}
         {screen === 'help' && <Help app={app} platform={platform} />}
-        {screen === 'about' && <About />}
+        {screen === 'about' && <About onErase={() => open(null)} />}
       </div>
 
       <input
@@ -210,6 +354,11 @@ export function App() {
       {screen === 'review' && loaded && (
         <footer className="actionbar">
           {toast && <p className={`toast${toast.bad ? ' bad' : ''}`} role="status">{toast.text}</p>}
+          {undo.length > 0 && (
+            <button type="button" className="linkbtn undo" onClick={() => void onUndo()}>
+              Desfazer: {undo.at(-1)?.label}
+            </button>
+          )}
           {platform === 'iphone' && app.pdfFileName ? [pdfBtn(true), sheetBtn(false)] : [sheetBtn(true), pdfBtn(false)]}
         </footer>
       )}

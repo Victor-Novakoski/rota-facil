@@ -10,42 +10,37 @@ interface Props {
   app: RouteAppProfile;
   isExample: boolean;
   fileName: string;
-  /** Troca o endereço dos pacotes de uma parada; o App refaz paradas, arquivo e conferência. */
-  onEdit: (waybills: string[], edit: AddressEdit) => void;
+  /** Paradas marcadas como conferidas e pares marcados como lugares diferentes (guardados no App). */
+  checked: ReadonlySet<string>;
+  apart: ReadonlySet<string>;
+  onToggle: (key: string) => void;
+  onApart: (key: string) => void;
+  /** Troca o endereço dos pacotes de uma parada; o App refaz paradas, arquivo e conferência. O rótulo vai no "Desfazer". */
+  onEdit: (waybills: string[], edit: AddressEdit, label: string) => void;
 }
 
 /** Chave que não muda quando as paradas são refeitas depois de uma edição. */
 const keyOf = (s: Stop) => s.packages[0]?.waybill ?? String(s.no);
 const pairKey = (d: DuplicatePair) => d.stops.map(keyOf).join('|');
 
-export function Review({ result, app, isExample, fileName, onEdit }: Props) {
+export function Review({ result, app, isExample, fileName, checked, apart, onToggle, onApart, onEdit }: Props) {
   const { packages, stops, check, noAddress, duplicates } = result;
-  const [checked, setChecked] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState('');
   const typed = query.replace(/\D/g, '');
   const found = findByFinal(stops, query);
-  // "são lugares diferentes" vale só enquanto a planilha está aberta
-  const [apart, setApart] = useState<Set<string>>(new Set());
   const maybeSame = duplicates.filter((d) => !apart.has(pairKey(d)));
   // parada editada continua na lista de avisos, para o entregador ver o que mudou
   const warned = stops.filter((s) => s.warnings.length || s.edited);
   const multi = stops.filter((s) => s.packages.length > 1);
   const pending = stops.filter((s) => s.warnings.length && !checked.has(keyOf(s))).length + maybeSame.length;
-  const toggle = (key: string) =>
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
   const card = (s: Stop, extra: { showWarnings?: boolean; found?: string[] } = {}) => (
     <StopCard
       key={keyOf(s)}
       stop={s}
       {...extra}
       checked={extra.showWarnings && checked.has(keyOf(s))}
-      onToggle={extra.showWarnings ? () => toggle(keyOf(s)) : undefined}
-      onEdit={(edit) => onEdit(s.packages.map((p) => p.waybill), edit)}
+      onToggle={extra.showWarnings ? () => onToggle(keyOf(s)) : undefined}
+      onEdit={(edit) => onEdit(s.packages.map((p) => p.waybill), edit, 'Editar endereço')}
     />
   );
 
@@ -54,7 +49,7 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
       {isExample ? (
         <p className="example-flag">Isto é um EXEMPLO com endereços inventados. Não use na rua.</p>
       ) : (
-        <p className="muted small file-name">{fileName}</p>
+        <p className="muted small file-name">{fileName} · suas edições ficam guardadas neste celular até amanhã</p>
       )}
 
       {check.ok && !noAddress.length && (
@@ -118,8 +113,8 @@ export function Review({ result, app, isExample, fileName, onEdit }: Props) {
               <DuplicateCard
                 key={pairKey(d)}
                 pair={d}
-                onMerge={(keep) => onEdit(d.stops[1 - keep].packages.map((p) => p.waybill), { line1: d.stops[keep].line1 })}
-                onDismiss={() => setApart((prev) => new Set(prev).add(pairKey(d)))}
+                onMerge={(keep) => onEdit(d.stops[1 - keep].packages.map((p) => p.waybill), { line1: d.stops[keep].line1 }, 'Juntar numa parada')}
+                onDismiss={() => onApart(pairKey(d))}
               />
             ))}
           </ul>
