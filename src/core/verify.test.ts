@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildRouteSheet, convertRows, findCarrier, findRouteApp } from '.';
+import { buildRouteSheet, convertRows, editPackages, findCarrier, findRouteApp, type Cell } from '.';
+import { writeSheet } from './spreadsheet';
 import { verify } from './verify';
 
 const imile = findCarrier('imile');
@@ -53,5 +54,69 @@ describe('conferência', () => {
     const check = verify(buildRouteSheet(broken, spoke), r.packages, spoke);
     expect(check.errors).toContain('CEP diferente no pacote final 1010.');
     expect(check.errors).toContain('No pacote final 1010 sumiu o número 60 do endereço.');
+  });
+});
+
+// Arquivos estragados de propósito: cada teste mexe num campo só e a conferência tem que travar o download.
+describe('conferência pega arquivo estragado', () => {
+  const r = convert(row('3320000002001', 'Rua Inventada 70 apto 1'), row('3320000002002', 'Rua Modelo 80'));
+  const check = (rows: Cell[][]) => verify(writeSheet(rows, 'Paradas'), r.packages, spoke);
+  const good = (): Cell[][] => [spoke.headers, ...r.stops.map(spoke.toRow)];
+  const col = (name: string) => spoke.headers.indexOf(name);
+
+  it('o arquivo certo passa', () => {
+    expect(check(good())).toMatchObject({ ok: true, errors: [] });
+  });
+
+  it('cidade trocada', () => {
+    const rows = good();
+    rows[1][col('City')] = 'Outra Cidade';
+    expect(check(rows).errors).toEqual(['Cidade diferente no pacote final 2001.']);
+  });
+
+  it('estado trocado', () => {
+    const rows = good();
+    rows[2][col('State')] = 'Santa Catarina';
+    expect(check(rows).errors).toEqual(['Estado diferente no pacote final 2002.']);
+  });
+
+  it('cabeçalho trocado ou fora de ordem', () => {
+    const rows = good();
+    rows[0] = [...spoke.headers].reverse();
+    expect(check(rows).ok).toBe(false);
+    expect(check(rows).errors).toContain('Os cabeçalhos do arquivo gerado não estão certos.');
+  });
+
+  it('o mesmo rastreio em duas paradas', () => {
+    const rows = good();
+    rows[2][col('Notes')] = `${rows[2][col('Notes')]} ; 3320000002001`;
+    rows[2][col('Packages')] = 2;
+    const c = check(rows);
+    expect(c.errors).toContain('O rastreio final 2001 aparece 2 vez(es) no arquivo, mas devia aparecer 1.');
+    expect(c.errors).toContain('O arquivo tem 3 pacotes, mas a planilha tem 2.');
+  });
+
+  it('quantidade de pacotes da parada não bate com os rastreios', () => {
+    const rows = good();
+    rows[1][col('Packages')] = 2;
+    rows[2][col('Packages')] = 0;
+    const c = check(rows);
+    expect(c.errors).toContain('Na parada 1 a quantidade de pacotes não bate com os rastreios.');
+    expect(c.errors).toContain('Na parada 2 a quantidade de pacotes não bate com os rastreios.');
+  });
+
+  it('pacote repetido no arquivo deixa o total maior que a planilha', () => {
+    const rows = good();
+    rows.push([...rows[2]]);
+    const c = check(rows);
+    expect(c.errors).toContain('O arquivo tem 3 pacotes, mas a planilha tem 2.');
+    expect(c.errors).toContain('O rastreio final 2002 aparece 2 vez(es) no arquivo, mas devia aparecer 1.');
+  });
+
+  it('número digitado pelo entregador que sumiu do arquivo', () => {
+    const edited = editPackages(r.packages, ['3320000002002'], { line1: 'Rua Modelo, 85' });
+    const rows = good(); // arquivo antigo, ainda com o 80 da planilha
+    const c = verify(writeSheet(rows, 'Paradas'), edited, spoke);
+    expect(c.errors).toContain('No pacote final 2002 sumiu o número 85 do endereço.');
   });
 });
