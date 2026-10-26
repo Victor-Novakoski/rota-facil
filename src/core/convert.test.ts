@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { convertFile, convertRows, findCarrier, findRouteApp, FriendlyError } from '.';
+import { buildRoute, convertFile, convertRows, editPackages, findCarrier, findRouteApp, FriendlyError } from '.';
 import { readSheets } from './spreadsheet';
 
 const imile = findCarrier('imile');
@@ -156,5 +156,28 @@ describe('rua com número no nome', () => {
     const r = convertRows([h, row('3320000000901', 'Rua 7, 100'), row('3320000000902', 'Rua 7, 200'), row('3320000000903', 'Rua 7 100 casa 2')], imile, spoke);
     expect(r.stops.map((s) => [s.line1, s.packages.length])).toEqual([['Rua 7, 100', 2], ['Rua 7, 200', 1]]);
     expect(r.check).toMatchObject({ ok: true, total: 3, stops: 2 });
+  });
+});
+
+describe('dois números seguidos no endereço', () => {
+  const h = Object.values(imile.columns);
+  const row = (w: string, addr: string) => {
+    const r: string[] = h.map(() => '');
+    const set = (k: keyof typeof imile.columns, v: string) => (r[h.indexOf(imile.columns[k])] = v);
+    set('waybill', w); set('zip', '80000-050'); set('state', 'Paraná'); set('city', 'Curitiba'); set('area', 'Centro');
+    set('address', addr); set('lat', '-25.43'); set('lon', '-49.27');
+    return r;
+  };
+  const r = convertRows([h, row('3320000001001', 'Rua Inventada 1807 464'), row('3320000001002', 'Rua Inventada 1807 apto 12')], imile, spoke);
+
+  it('avisa para conferir o número e passa na conferência', () => {
+    expect(r.stops).toHaveLength(1);
+    expect(r.stops[0].warnings.map((w) => w.kind)).toEqual(['twoNumbers']);
+    expect(r.check).toMatchObject({ ok: true, total: 2, stops: 1 });
+  });
+
+  it('o aviso some quando o entregador edita o endereço', () => {
+    const edited = buildRoute(editPackages(r.packages, ['3320000001001'], { line1: 'Rua Inventada, 464' }), r.noAddress, spoke);
+    expect(edited.stops.flatMap((s) => s.warnings.map((w) => w.kind))).not.toContain('twoNumbers');
   });
 });
