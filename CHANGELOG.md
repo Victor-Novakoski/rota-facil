@@ -1,5 +1,17 @@
 # O que mudou
 
+## 2.2.2 – 2026-10-26
+
+Correções do primeiro dia de rota de verdade (24/10) e da revisão final.
+
+- Endereço com a faixa de números do CEP colada na rua ("- de 1001/1002 a 2999/3000") não engana mais o app de rota: a faixa sai e a parada ganha aviso amarelo para conferir o número.
+- Nome do prédio entre parênteses na rua vai para o complemento.
+- Endereço editado sem vírgula ("Rua X 50") é gravado como "Rua X, 50".
+- Pacotes sem número na mesma rua só viram uma parada se estiverem no mesmo ponto do mapa.
+- Rua com número no nome ("Rua 7, 100" e "Rua 7, 200") não junta mais casas diferentes numa parada só.
+- Telefone ou CEP escrito no complemento não trava mais a conferência.
+- O arquivo do Spoke não leva mais latitude e longitude: o Spoke acha cada parada pelo endereço, inclusive o que você corrigiu no app. O aviso "Sem localização" saiu.
+
 ## 2.2.1 – 2026-10-22
 
 - O botão voltar do Android não fecha mais o app: da Ajuda e do Sobre ele volta para a tela de antes, sem perder a planilha aberta, e da conferência volta para o início para abrir outra planilha.

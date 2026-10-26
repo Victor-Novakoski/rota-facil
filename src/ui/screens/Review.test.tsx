@@ -34,13 +34,13 @@ describe('Review', () => {
     expect(screen.getByText('Isto é um EXEMPLO com endereços inventados. Não use na rua.')).toBeInTheDocument();
     expect(screen.getByText('pacotes').previousSibling).toHaveTextContent('10');
     expect(screen.getByText('paradas').previousSibling).toHaveTextContent('8');
-    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('5');
+    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('4');
   });
 
   it('marcar um aviso como conferido diminui a contagem', async () => {
     render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
     await userEvent.click(screen.getAllByRole('button', { name: 'Marcar como conferido' })[0]);
-    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('4');
+    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('3');
     expect(screen.getByRole('button', { name: '✓ Conferido' })).toHaveAttribute('aria-pressed', 'true');
   });
 
@@ -74,7 +74,7 @@ describe('Review', () => {
     const edited = warnCard('Rua dos Testes, 50');
     expect(within(edited).getByText('editado por você')).toBeInTheDocument();
     expect(within(edited).queryByText('Sem número no endereço.')).not.toBeInTheDocument();
-    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('4');
+    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('3');
     expect(screen.getByText('paradas').previousSibling).toHaveTextContent('8');
     expect(screen.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeInTheDocument();
   });
@@ -88,7 +88,7 @@ describe('Review', () => {
     expect(within(card).getByRole('alert')).toHaveTextContent('Escreva a rua e o número.');
     await userEvent.click(within(card).getByRole('button', { name: 'Cancelar' }));
     expect(screen.queryByText('editado por você')).not.toBeInTheDocument();
-    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('5');
+    expect(screen.getByText('avisos').previousSibling).toHaveTextContent('4');
   });
 
   it('parada com vários pacotes só edita a rua e o número', async () => {
@@ -136,7 +136,7 @@ describe('Review', () => {
       expect(screen.getByRole('radio', { name: /Rua XV de Novembro, 72/ })).toBeChecked();
       expect(screen.getByRole('radio', { name: /Rua XV, 72/ })).not.toBeChecked();
       expect(screen.getByText('paradas').previousSibling).toHaveTextContent('10');
-      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('6');
+      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('5');
     });
 
     it('juntar vira uma parada só, marcada "editado por você", e a conferência continua ok', async () => {
@@ -144,7 +144,7 @@ describe('Review', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Juntar numa parada' }));
       expect(screen.queryByRole('heading', { name: 'Pode ser o mesmo endereço' })).not.toBeInTheDocument();
       expect(screen.getByText('paradas').previousSibling).toHaveTextContent('9');
-      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('5');
+      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('4');
       const merged = warnCard('Rua XV de Novembro, 72');
       expect(within(merged).getByText('2 pacotes')).toBeInTheDocument();
       expect(within(merged).getByText('editado por você')).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe('Review', () => {
       await userEvent.click(screen.getByRole('button', { name: 'São lugares diferentes' }));
       expect(screen.queryByRole('heading', { name: 'Pode ser o mesmo endereço' })).not.toBeInTheDocument();
       expect(screen.getByText('paradas').previousSibling).toHaveTextContent('10');
-      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('5');
+      expect(screen.getByText('avisos').previousSibling).toHaveTextContent('4');
     });
   });
 });

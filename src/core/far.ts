@@ -38,7 +38,7 @@ export function markFarStops(stops: Stop[]): Stop[] {
     const d = dist.get(s);
     if (d === undefined || d <= limit) return s;
     const km = d < 100 ? Math.round(d) : Math.round(d / 10) * 10;
-    const text = `Ponto no mapa longe das outras paradas (uns ${km} km). Pode estar em outra cidade. Confira antes de importar.`;
+    const text = `A localização da planilha está longe das outras paradas (uns ${km} km). O endereço pode ser de outra cidade. Confira no app de rota se a parada caiu no lugar certo.`;
     return { ...s, warnings: [...s.warnings, { kind: 'farCoords', text }] };
   });
 }

@@ -61,6 +61,20 @@ const isNum = (t: string) => /^\d+$/.test(t);
 const isSN = (t: string) => /^s\/n[º°]?\.?$/i.test(t) || /^s\.n\.?$/i.test(t);
 const isCompWord = (t: string) => COMPLEMENT_KEYS.includes(wordKey(t));
 
+/** Siglas de rodovia: "BR 116", "SC 401", "Rodovia PR 090". */
+const HIGHWAY_CODES = ['br', 'ac', 'al', 'ap', 'am', 'ba', 'ce', 'df', 'es', 'go', 'ma', 'mt', 'ms', 'mg', 'pa', 'pb', 'pr', 'pe', 'pi', 'rj', 'rn', 'rs', 'ro', 'rr', 'sc', 'sp', 'se', 'to'];
+const BARE_TYPES = ['rua', 'avenida', 'travessa', 'alameda', 'rodovia', 'estrada', 'praca'];
+
+/**
+ * O que vem antes do número é só o tipo, sem nome ("Rua", "Rodovia SC", "BR")?
+ * Então o número é o nome da rua ("Rua 7", "SC 401"), não o da casa.
+ */
+function isBareStreet(before: string[]): boolean {
+  const k = before.map(wordKey);
+  if (k.length === 1) return BARE_TYPES.includes(k[0]) || HIGHWAY_CODES.includes(k[0]);
+  return k.length === 2 && BARE_TYPES.includes(k[0]) && HIGHWAY_CODES.includes(k[1]);
+}
+
 /** Regra 3.5: tira "Centro" (ou o bairro da linha) que sobrou no fim do complemento. */
 function stripTrailingArea(s: string, area: string): string {
   let t = s;
@@ -70,12 +84,33 @@ function stripTrailingArea(s: string, area: string): string {
   return t.replace(/^[\s\-–]+|[\s\-–]+$/g, '');
 }
 
+/**
+ * Faixa de números do CEP que alguns sites colam no nome da rua, copiada da base dos Correios:
+ * "Avenida Exemplo - de 1001/1002 a 2999/3000", "- até 999/1000", "- de 501 ao fim", "- lado ímpar".
+ * Não é o número da casa e confunde o app de rota, então sai do endereço.
+ */
+const N = String.raw`\d+(?:\s*/\s*\d+)?`;
+const SIDE = String.raw`lado\s+(?:par|[ií]mpar)`;
+const RANGE = String.raw`(?:de\s+${N}\s+(?:a|at[ée])\s+${N}|de\s+${N}\s+ao\s+fim|at[ée]\s+${N})(?:\s*[-–]\s*${SIDE})?|${SIDE}`;
+const ZIP_RANGE = new RegExp(
+  // com hífen antes, ou sem hífen quando vem no formato inconfundível "de 1001/1002 a 2999/3000"
+  String.raw`\s*[-–]\s*(?:${RANGE})(?=[\s,]|$)|\s+de\s+\d+\s*/\s*\d+\s+(?:a|at[ée])\s+\d+\s*/\s*\d+(?=[\s,]|$)`,
+  'giu',
+);
+
+/** Tira a faixa de números do CEP do texto. Também usada na conferência, para não cobrar esses números. */
+export function stripZipRange(raw: string): { text: string; removed: boolean } {
+  const text = String(raw ?? '').replace(ZIP_RANGE, ' ').replace(/\s+/g, ' ').trim();
+  return { text, removed: text !== String(raw ?? '').replace(/\s+/g, ' ').trim() };
+}
+
 /** Recebe o endereço como o cliente digitou e separa rua + número (line1) e complemento (line2). */
 export function cleanAddress(raw: string, area = ''): CleanAddress {
-  const flags = { fixes: [] as string[], noNumber: false, reordered: false, dupRemoved: false };
+  const range = stripZipRange(raw);
+  const flags = { fixes: [] as string[], noNumber: false, reordered: false, dupRemoved: false, zipRange: range.removed };
 
   // regra 3.1: vírgulas viram espaço
-  let a = String(raw ?? '').replace(/\s*,\s*/g, ' ').replace(/\s+/g, ' ').trim();
+  let a = range.text.replace(/\s*,\s*/g, ' ').replace(/\s+/g, ' ').trim();
   a = a.replace(/(^|\s)n[º°]\.?\s*(?=\d)/giu, '$1'); // "nº 12" -> "12"
 
   a = expandAbbreviations(a);
@@ -92,10 +127,24 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
 
   const tk = a.split(' ').filter(Boolean);
 
+  // o que está entre parênteses (nome do prédio, referência) nunca é o número da casa
+  // parêntese aberto e não fechado é ignorado, para não esconder o número que vem depois
+  const balanced = (a.match(/\(/g) ?? []).length === (a.match(/\)/g) ?? []).length;
+  const inParens: boolean[] = [];
+  let depth = 0;
+  for (const t of balanced ? tk : []) {
+    depth += (t.match(/\(/g) ?? []).length;
+    inParens.push(depth > 0);
+    depth = Math.max(0, depth - (t.match(/\)/g) ?? []).length);
+  }
+
   // regra 3.3: primeiro número (pulando nomes como "7 de Setembro" e "24 de Maio")
+  // e o número que é o próprio nome da rua: "Rua 7, 100", "Rodovia SC 401 5000"
   let i = -1;
   for (let k = 1; k < tk.length; k++) {
+    if (inParens[k] === true) continue;
     if (isSN(tk[k])) { i = k; break; }
+    if (isNum(tk[k]) && isBareStreet(tk.slice(0, k))) continue;
     if (isNum(tk[k]) && !/^(de|do|da)$/i.test(tk[k + 1] ?? '')) { i = k; break; }
   }
 
@@ -123,10 +172,19 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
     number = tk[i + 1];
     comp = [tk[i - 1], tk[i], ...tk.slice(i + 2)];
   } else if (i >= 2 && isCompWord(tk[i - 1])) {
-    // "Rua X apto 91" sem o número da casa
+    // "Rua X apto 91" sem o número da casa; "Rua X edifício Y apto 91" corta já no edifício
     flags.noNumber = true;
+    let j = i - 1;
+    for (let k = 2; k < i - 1; k++) {
+      if (NO_NUMBER_SPLIT.includes(wordKey(tk[k]))) { j = k; break; }
+    }
+    street = tk.slice(0, j);
+    comp = tk.slice(j);
+  } else if (i >= 2 && wordKey(tk[i - 1]) === 'km') {
+    // rodovia: "BR 116 km 30" -> "BR 116, km 30"
     street = tk.slice(0, i - 1);
-    comp = tk.slice(i - 1);
+    number = `km ${tk[i]}`;
+    comp = tk.slice(i + 1);
   } else {
     street = tk.slice(0, i);
     number = tk[i];
@@ -139,7 +197,14 @@ export function cleanAddress(raw: string, area = ''): CleanAddress {
     flags.dupRemoved = true;
   }
 
-  const st = street.join(' ').replace(/[\s\-–]+$/, '');
+  // parênteses no meio da rua vão para o complemento: o app de rota se perde com "Rua X (Edifício Y), 10"
+  let streetText = street.join(' ');
+  const inside = [...streetText.matchAll(/\(([^()]*)\)/g)].map((m) => m[1].trim()).filter(Boolean);
+  if (inside.length) {
+    streetText = streetText.replace(/\s*\([^()]*\)/g, ' ');
+    comp = [...inside, ...comp];
+  }
+  const st = streetText.replace(/\s+/g, ' ').trim().replace(/[\s\-–]+$/, '');
   let line2 = stripTrailingArea(comp.join(' '), area);
   if (flags.noNumber && !/^s\/n/i.test(line2)) line2 = `${line2 ? `${line2} ` : ''}(sem número)`;
 

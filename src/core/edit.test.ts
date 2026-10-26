@@ -3,6 +3,7 @@ import { buildRoute, buildRouteSheet, convertRows, editPackages, findCarrier, fi
 import { EXAMPLE_ROWS } from '../ui/example';
 import { readSheets } from './spreadsheet';
 import { verify } from './verify';
+import { withNumberComma } from './edit';
 
 const imile = findCarrier('imile');
 const spoke = findRouteApp('spoke');
@@ -80,6 +81,19 @@ describe('editar o endereço de uma parada', () => {
     const stale = verify(buildRouteSheet(base.stops, spoke), edited, spoke);
     expect(stale.ok).toBe(false);
     expect(stale.errors).toContain('No pacote final 0055 sumiu o número 50 do endereço.');
+  });
+
+  // Teste na rua: "Avenida X 3070" digitado sem vírgula perdeu o número no Spoke
+  it('põe a vírgula antes do número quando o entregador digita sem', () => {
+    const s = stopOf(edit('49600000000055', 'Rua dos Testes 50'), '49600000000055');
+    expect(s.line1).toBe('Rua dos Testes, 50');
+    expect(withNumberComma('Rua dos Testes 50A')).toBe('Rua dos Testes, 50A');
+    expect(withNumberComma('Rua dos Testes, 50')).toBe('Rua dos Testes, 50');
+    expect(withNumberComma('Rua dos Testes 50 fundos')).toBe('Rua dos Testes 50 fundos'); // número no meio: deixa como está
+    expect(withNumberComma('Rodovia BR 116')).toBe('Rodovia BR 116');
+    expect(withNumberComma('Rua 7 100')).toBe('Rua 7, 100'); // número no nome da rua
+    expect(withNumberComma('SC 401 7000')).toBe('SC 401, 7000');
+    expect(withNumberComma('Rua dos Testes')).toBe('Rua dos Testes');
   });
 
   it('não muda a lista original e recusa endereço vazio', () => {

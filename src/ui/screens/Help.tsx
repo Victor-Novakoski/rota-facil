@@ -49,8 +49,8 @@ export function Help({ app, platform }: { app: RouteAppProfile; platform: Platfo
       <section className="card">
         <h2>O que os avisos amarelos querem dizer</h2>
         <ul className="plain-list">
-          <li><b>Sem número:</b> o cliente não escreveu o número da casa. O ponto no mapa vem da localização da planilha.</li>
-          <li><b>Sem localização:</b> a planilha veio sem o ponto no mapa. O app de rota procura pelo endereço escrito, então confira se caiu no lugar certo.</li>
+          <li><b>Sem número:</b> o cliente não escreveu o número da casa. Veja o número na etiqueta e use <b>Editar endereço</b>.</li>
+          <li><b>Localização longe ou fora do Brasil:</b> o ponto que veio na planilha está estranho, então o endereço pode estar errado. O app de rota procura pelo endereço escrito: confira se a parada caiu no lugar certo.</li>
           <li><b>Endereço corrigido:</b> o Rota Fácil arrumou o nome da rua ou a ordem do número. Confira se ficou certo.</li>
         </ul>
       </section>

@@ -29,13 +29,17 @@ describe('planilha de exemplo (10 entregas inventadas)', () => {
 
   it('mostra os avisos esperados', () => {
     const kinds = r.stops.map((s) => s.warnings.map((w) => w.kind));
-    expect(kinds).toEqual([[], [], ['noNumber'], ['reordered'], ['noNumber'], ['noCoords'], [], ['reordered']]);
+    expect(kinds).toEqual([[], [], ['noNumber'], ['reordered'], ['noNumber'], [], [], ['reordered']]);
   });
 
-  it('grava o arquivo com os cabeçalhos exatos do Spoke', () => {
+  it('grava o arquivo com os cabeçalhos exatos do Spoke, sem latitude e longitude', () => {
     const rows = readSheets(r.sheet)[0];
     expect(rows[0]).toEqual(spoke.headers);
-    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', '', '', 1, '0088 | 1 pacote: 3320000000088 (Cartório)']);
+    // o Spoke dava preferência ao ponto da planilha e ignorava o endereço corrigido
+    expect(rows[0]).not.toContain('Latitude');
+    expect(rows[0]).not.toContain('Longitude');
+    expect(rows[1]).toHaveLength(spoke.headers.length);
+    expect(rows[6]).toEqual(['Rua Sem Mapa, 128', 'Cartório', 'Curitiba', 'Paraná', '80000-006', 'Brasil', 1, '0088 | 1 pacote: 3320000000088 (Cartório)']);
   });
 });
 
@@ -79,5 +83,78 @@ describe.skipIf(!existsSync(real))('planilha real (fora do repositório)', () =>
     const r = convertFile(load(real), imile, spoke);
     expect(r.check.errors).toEqual([]);
     if (process.env.REAL_EXPECT) expect(`${r.packages.length}/${r.stops.length}`).toBe(process.env.REAL_EXPECT);
+  });
+});
+
+// Endereços inventados que repetem o que apareceu no teste na rua
+describe('faixa do CEP e parênteses na rua', () => {
+  const h = Object.values(imile.columns);
+  const row = (w: string, addr: string) => {
+    const r: string[] = h.map(() => '');
+    const set = (k: keyof typeof imile.columns, v: string) => (r[h.indexOf(imile.columns[k])] = v);
+    set('waybill', w); set('zip', '80000-020'); set('state', 'Paraná'); set('city', 'Curitiba'); set('area', 'Centro');
+    set('address', addr); set('lat', '-25.43'); set('lon', '-49.27');
+    return r;
+  };
+  const r = convertRows([
+    h,
+    row('49600000000701', 'Avenida Inventada- de 1001/1002 a 2999/3000 Apto 1305 2500'),
+    row('49600000000702', 'Avenida Inventada- de 1001/1002 a 2999/3000 edificio azul, apto 904'),
+    row('3320000000703', 'Rua Exemplo (Torre Azul) 117 Ap 1020'),
+  ], imile, spoke);
+
+  it('tira a faixa do arquivo, avisa e passa na conferência', () => {
+    const rows = readSheets(r.sheet)[0];
+    expect(rows.slice(1).map((x) => [x[0], x[1]])).toEqual([
+      ['Avenida Inventada, 2500', 'Apto 1305'],
+      ['Avenida Inventada', 'edificio azul apto 904 (sem número)'],
+      ['Rua Exemplo, 117', 'Torre Azul Ap 1020'],
+    ]);
+    expect(r.stops.map((s) => s.warnings.map((w) => w.kind))).toEqual([['reordered', 'zipRange'], ['noNumber', 'zipRange'], []]);
+    expect(r.check).toMatchObject({ ok: true, errors: [], total: 3, stops: 3 });
+  });
+});
+
+describe('pacotes sem número na mesma rua e CEP', () => {
+  const h = Object.values(imile.columns);
+  const row = (w: string, addr: string, lat: string, lon: string) => {
+    const r: string[] = h.map(() => '');
+    const set = (k: keyof typeof imile.columns, v: string) => (r[h.indexOf(imile.columns[k])] = v);
+    set('waybill', w); set('zip', '80000-030'); set('state', 'Paraná'); set('city', 'Curitiba'); set('area', 'Centro');
+    set('address', addr); set('lat', lat); set('lon', lon);
+    return r;
+  };
+
+  it('só junta quando o ponto no mapa é o mesmo', () => {
+    const r = convertRows([
+      h,
+      row('49600000000801', 'Rua Fictícia Apto 132', '-25.4343', '-49.2820'),
+      row('49600000000802', 'Rua Fictícia Apto 132', '-25.4343', '-49.2820'),
+      row('6100000000803', 'Rua Fictícia', '-25.4240', '-49.2869'), // outra casa, mais adiante na rua
+    ], imile, spoke);
+    expect(r.stops.map((s) => s.packages.length)).toEqual([2, 1]);
+    expect(r.check).toMatchObject({ ok: true, total: 3, stops: 2 });
+  });
+
+  it('sem ponto no mapa continua juntando pela rua e CEP', () => {
+    const r = convertRows([h, row('3320000000804', 'Rua Fictícia', '0', '0'), row('3320000000805', 'Rua Fictícia', '0', '0')], imile, spoke);
+    expect(r.stops).toHaveLength(1);
+  });
+});
+
+describe('rua com número no nome', () => {
+  const h = Object.values(imile.columns);
+  const row = (w: string, addr: string) => {
+    const r: string[] = h.map(() => '');
+    const set = (k: keyof typeof imile.columns, v: string) => (r[h.indexOf(imile.columns[k])] = v);
+    set('waybill', w); set('zip', '80000-040'); set('state', 'Paraná'); set('city', 'Curitiba'); set('area', 'Centro');
+    set('address', addr); set('lat', '0'); set('lon', '0');
+    return r;
+  };
+
+  it('casas diferentes da "Rua 7" ficam em paradas diferentes', () => {
+    const r = convertRows([h, row('3320000000901', 'Rua 7, 100'), row('3320000000902', 'Rua 7, 200'), row('3320000000903', 'Rua 7 100 casa 2')], imile, spoke);
+    expect(r.stops.map((s) => [s.line1, s.packages.length])).toEqual([['Rua 7, 100', 2], ['Rua 7, 200', 1]]);
+    expect(r.check).toMatchObject({ ok: true, total: 3, stops: 2 });
   });
 });

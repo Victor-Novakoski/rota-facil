@@ -5,17 +5,17 @@ export const spoke: RouteAppProfile = {
   name: 'Spoke',
   compat: 'Gera arquivo para importar no Spoke.',
   freeStopLimit: 10,
-  // Cabeçalhos exatos que o Spoke reconheceu sozinho (referência técnica, seção 2)
-  headers: ['Address Line 1', 'Address Line 2', 'City', 'State', 'Zip/Postal Code', 'Country', 'Latitude', 'Longitude', 'Packages', 'Notes'],
-  toRow: (s) => [s.line1, s.line2 || null, s.city, s.state, s.zip, 'Brasil', s.lat, s.lon, s.packages.length, s.notes],
+  // Cabeçalhos exatos que o Spoke reconheceu sozinho (referência técnica, seção 2).
+  // Sem Latitude e Longitude: o Spoke dava preferência ao ponto da planilha, que às vezes vem errado,
+  // e ignorava o endereço corrigido. Sem elas, ele procura pelo endereço escrito.
+  headers: ['Address Line 1', 'Address Line 2', 'City', 'State', 'Zip/Postal Code', 'Country', 'Packages', 'Notes'],
+  toRow: (s) => [s.line1, s.line2 || null, s.city, s.state, s.zip, 'Brasil', s.packages.length, s.notes],
   cols: {
     line1: 'Address Line 1',
     line2: 'Address Line 2',
     city: 'City',
     state: 'State',
     zip: 'Zip/Postal Code',
-    lat: 'Latitude',
-    lon: 'Longitude',
     packages: 'Packages',
     notes: 'Notes',
   },
