@@ -1,6 +1,8 @@
 # O que mudou
 
-## A publicar
+## 2.2.2 – 2026-10-26
+
+Correções do primeiro dia de rota de verdade (24/10) e da revisão final.
 
 - Endereço com a faixa de números do CEP colada na rua ("- de 1001/1002 a 2999/3000") não engana mais o app de rota: a faixa sai e a parada ganha aviso amarelo para conferir o número.
 - Nome do prédio entre parênteses na rua vai para o complemento.
