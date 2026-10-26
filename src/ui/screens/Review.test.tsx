@@ -14,22 +14,30 @@ const noop = () => {};
 /** Faz o papel do App: guarda o resultado e refaz tudo a cada edição. */
 function Editable({ start = result }: { start?: RouteResult }) {
   const [r, setR] = useState(start);
+  const [checked, setChecked] = useState<ReadonlySet<string>>(new Set());
+  const [apart, setApart] = useState<ReadonlySet<string>>(new Set());
   return (
     <Review
       result={r}
       app={app}
       isExample={false}
       fileName="rota.xlsx"
+      checked={checked}
+      apart={apart}
+      onToggle={(k) => setChecked((prev) => (prev.has(k) ? new Set([...prev].filter((x) => x !== k)) : new Set(prev).add(k)))}
+      onApart={(k) => setApart((prev) => new Set(prev).add(k))}
       onEdit={(waybills, edit) => setR(buildRoute(editPackages(r.packages, waybills, edit), r.noAddress, app))}
     />
   );
 }
+/** Sem marcas: para os testes que só olham a tela. */
+const still = { checked: new Set<string>(), apart: new Set<string>(), onToggle: noop, onApart: noop };
 
 const warnCard = (text: string) => screen.getAllByText(text)[0].closest('li') as HTMLElement;
 
 describe('Review', () => {
   it('mostra a conferência, os totais e o aviso de exemplo', () => {
-    render(<Review result={result} app={app} isExample fileName="Exemplo" onEdit={noop} />);
+    render(<Review result={result} app={app} isExample fileName="Exemplo" onEdit={noop} {...still} />);
     expect(screen.getByText('Conferido: 10 pacotes, nenhum perdido')).toBeInTheDocument();
     expect(screen.getByText('Isto é um EXEMPLO com endereços inventados. Não use na rua.')).toBeInTheDocument();
     expect(screen.getByText('pacotes').previousSibling).toHaveTextContent('10');
@@ -38,7 +46,7 @@ describe('Review', () => {
   });
 
   it('marcar um aviso como conferido diminui a contagem', async () => {
-    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    render(<Editable />);
     await userEvent.click(screen.getAllByRole('button', { name: 'Marcar como conferido' })[0]);
     expect(screen.getByText('avisos').previousSibling).toHaveTextContent('3');
     expect(screen.getByRole('button', { name: '✓ Conferido' })).toHaveAttribute('aria-pressed', 'true');
@@ -46,18 +54,18 @@ describe('Review', () => {
 
   it('bloqueia e explica quando a conferência falha', () => {
     const broken = { ...result, check: { ok: false, errors: ['O arquivo tem 9 pacotes, mas a planilha tem 10.'], total: 9, stops: 8 } };
-    render(<Review result={broken} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    render(<Review result={broken} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} {...still} />);
     expect(screen.getByRole('alert')).toHaveTextContent('Erro na conferência. O arquivo não foi liberado.');
     expect(screen.getByText('O arquivo tem 9 pacotes, mas a planilha tem 10.')).toBeInTheDocument();
   });
 
   it('avisa o limite do plano grátis do app de rota', () => {
-    render(<Review result={result} app={{ ...app, freeStopLimit: 5 }} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    render(<Review result={result} app={{ ...app, freeStopLimit: 5 }} isExample={false} fileName="rota.xlsx" onEdit={noop} {...still} />);
     expect(screen.getByText(/O plano grátis do Spoke aceita até 5 por rota/)).toBeInTheDocument();
   });
 
   it('não mostra "Parada N" nos cartões', () => {
-    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} {...still} />);
     expect(screen.queryByText(/Parada \d/)).not.toBeInTheDocument();
   });
 
@@ -100,7 +108,7 @@ describe('Review', () => {
   });
 
   it('acha a parada pelo final do rastreio e destaca o pacote', async () => {
-    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} {...still} />);
     const search = screen.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
     await userEvent.type(within(search).getByRole('searchbox'), '0022');
     const card = within(search).getByText('Rua das Flores, 120').closest('li') as HTMLElement;
@@ -110,7 +118,7 @@ describe('Review', () => {
   });
 
   it('avisa quando nenhum pacote tem aquele final', async () => {
-    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    render(<Review result={result} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} {...still} />);
     const search = screen.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
     await userEvent.type(within(search).getByRole('searchbox'), '9999');
     expect(within(search).getByRole('status')).toHaveTextContent('Nenhum pacote termina em 9999.');
@@ -118,7 +126,7 @@ describe('Review', () => {
 
   it('mostra as duas paradas quando dois pacotes têm o mesmo final', async () => {
     const twin = { ...result.stops[7], packages: [{ ...result.stops[7].packages[0], waybill: '7770000000022' }] };
-    render(<Review result={{ ...result, stops: [...result.stops, twin] }} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} />);
+    render(<Review result={{ ...result, stops: [...result.stops, twin] }} app={app} isExample={false} fileName="rota.xlsx" onEdit={noop} {...still} />);
     const search = screen.getByRole('region', { name: 'Achar pacote pelo final do rastreio' });
     await userEvent.type(within(search).getByRole('searchbox'), '0022');
     expect(within(search).getByRole('status')).toHaveTextContent('2 paradas têm pacote terminando em 0022. Confira o rastreio inteiro na etiqueta.');

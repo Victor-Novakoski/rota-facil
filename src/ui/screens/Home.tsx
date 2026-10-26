@@ -9,11 +9,25 @@ interface Props {
   onCarrier: (id: string) => void;
   onApp: (id: string) => void;
   onExample: () => void;
+  /** Planilha que continua aberta (ou voltou do celular depois de recarregar). */
+  open?: { fileName: string; packages: number; edits: number };
+  onResume: () => void;
 }
 
-export function Home({ carrier, app, onCarrier, onApp, onExample }: Props) {
+export function Home({ carrier, app, onCarrier, onApp, onExample, open, onResume }: Props) {
   return (
     <main className="screen home">
+      {open && (
+        <section className="card resume" aria-label="Planilha aberta">
+          <p>
+            <b>{open.fileName}</b> continua aberta: {open.packages} pacotes
+            {open.edits > 0 && `, ${open.edits === 1 ? '1 endereço editado' : `${open.edits} endereços editados`}`}.
+          </p>
+          <button type="button" className="btn secondary" onClick={onResume}>
+            <span className="lbl">Voltar para a conferência</span>
+          </button>
+        </section>
+      )}
       <section className="hero">
         <h1>Planilha do dia vira rota pronta.</h1>
         <p className="lead">Abra a planilha que a base mandou. O Rota Fácil separa os endereços, junta os pacotes do mesmo lugar e gera o arquivo para o app de rota.</p>

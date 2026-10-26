@@ -4,7 +4,7 @@ O Rota Fácil não tem servidor, banco, login nem API. Os dados da planilha (end
 
 | Risco | Situação | Como o projeto trata |
 | --- | --- | --- |
-| Dados sensíveis (LGPD) | ✅ feito | A planilha é lida no navegador. Nenhum `fetch` com conteúdo, sem analytics, sem servidor. O `localStorage` guarda só preferências. |
+| Dados sensíveis (LGPD) | ✅ feito | A planilha é lida no navegador. Nenhum `fetch` com conteúdo, sem analytics, sem servidor. O `localStorage` guarda as preferências e a conferência do dia (pacotes, edições e marcas), só no aparelho, para não perder o trabalho se a página recarregar. Ela vale só no dia: é apagada no dia seguinte, ao abrir outra planilha ou no "Apagar agora" do Sobre. Risco aceito pelo Victor (26/10): quem pegar o celular desbloqueado vê a rota do dia, que já está no WhatsApp e nos Downloads. |
 | Vazamento por terceiros | ✅ feito | Fontes e bibliotecas vão dentro do app. A página não chama nenhum outro site. |
 | Planilha real no repositório | ✅ feito | O `.gitignore` bloqueia `.xlsx`, `.xls` e `.csv` fora de `src/core/fixtures/`. Testes e prints usam dados inventados; a planilha real só entra pela variável `REAL_SHEET`. |
 | XSS (planilha com HTML ou script) | ✅ feito | Todo texto da planilha é mostrado pelo React, que escapa o conteúdo. Não há `dangerouslySetInnerHTML`. |

@@ -85,6 +85,8 @@ Não há rotas de URL; o app troca de tela por estado. Cada troca de tela també
 | Ajuda | `screens/Help.tsx` | Botão "Ajuda" no topo |
 | Sobre | `screens/About.tsx` | Botão "Sobre" no topo |
 
+A conferência do dia (pacotes, edições, "Conferido" e "São lugares diferentes") fica no `App` e é guardada no `localStorage` por `src/ui/session.ts` até o dia seguinte. Se a página recarregar, o App reabre a conferência sozinho; se o app abrir no início, aparece "Voltar para a conferência". O "Desfazer" guarda os pacotes de antes de cada edição ou junção, só na memória.
+
 ## Perfis
 
 Adicionar uma transportadora ou um app de rota é criar um perfil novo. O motor não muda.

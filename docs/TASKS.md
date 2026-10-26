@@ -60,9 +60,10 @@ Só se trabalha na etapa atual. O que surgir no caminho entra aqui antes de ser 
 - [x] Revisão final, item 10: a Ajuda explica todos os avisos (faixa do CEP, CEP estranho, ponto longe, fora do Brasil, pode ser o mesmo endereço, dois números), gerada de uma lista só
 - [x] Revisão final, item 4: testes que estragam o arquivo de propósito (cidade, estado, cabeçalho, rastreio repetido, quantidade de pacotes, número digitado perdido)
 - [x] Revisão final, item 7: PDF do iPhone depois de atualizar o app (carregar o PDF quando a conferência abre; mensagem para fechar e abrir se falhar)
-- [ ] Marcas "Conferido" e "lugares diferentes" não podem sumir ao abrir a Ajuda e voltar (bug achado em 26/10)
-- [ ] Revisão final, item 6: desfazer depois de juntar paradas, "São lugares diferentes" e editar
-- [ ] Revisão final, item 5: "Voltar para a conferência" no início; perguntar antes de perder edições ao abrir outra planilha ou trocar transportadora/app
+- [x] Marcas "Conferido" e "lugares diferentes" não podem sumir ao abrir a Ajuda e voltar (bug achado em 26/10)
+- [x] Revisão final, item 6: desfazer depois de juntar paradas, "São lugares diferentes" e editar
+- [x] Victor (26/10): guardar a conferência no celular até o fim do dia, para não perder as edições se a página recarregar; sem "puxar para recarregar"
+- [x] Revisão final, item 5: "Voltar para a conferência" no início; perguntar antes de perder edições ao abrir outra planilha ou trocar transportadora/app
 - [ ] Revisão final, itens 9 e 11: lista de avisos mais curta e "Como importar" depois de baixar
 - [ ] No próximo teste: conferir se o Spoke acha bem as paradas só pelo endereço, e se as paradas com parênteses e as editadas aparecem com número
 - [ ] Definir o número do WhatsApp para "Avisar um problema"
